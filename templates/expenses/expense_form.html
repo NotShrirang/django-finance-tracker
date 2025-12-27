@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-transparent fw-bold py-3">
+                {% if object %}Edit Expense{% else %}New Expense{% endif %}
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{{ field.label }}</label>
+                        <!-- Basic form control class injection for generic views -->
+                        {% if field.field.widget.input_type == "checkbox" %}
+                            <div class="form-check">
+                                {{ field }}
+                                <label class="form-check-label" for="{{ field.id_for_label }}">
+                                    {{ field.help_text }}
+                                </label>
+                            </div>
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                   name="{{ field.name }}" 
+                                   class="form-control"
+                                   {% if field.value %}value="{{ field.value|date:'Y-m-d'|default:field.value }}"{% endif %} 
+                                   {% if field.field.required %}required{% endif %}
+                                   {% if field.field.widget.input_type == "number" %}step="0.01"{% endif %}>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                        <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

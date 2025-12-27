@@ -1,0 +1,12 @@
+/* 
+   We are using Bootstrap 5.3 which handles most styling.
+   We can add custom overrides here if needed.
+   Currently empty to let Bootstrap take over completely.
+*/
+body {
+    /* Optional: Ensure font family matches user preference if not fully covered by BS */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Enhancing the glassmorphism slightly on top of bootstrap dark mode if desired, 
+   but for now let's keep it "Professional Standard" which usually implies clean, flat, high contrast */

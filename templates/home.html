@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Dashboard</h1>
+    
+    <!-- Filter Form -->
+    <form method="get" class="d-flex gap-2 align-items-center bg-body-tertiary p-2 rounded shadow-sm border flex-wrap" id="filter-form">
+        <select name="year" class="form-select form-select-sm" style="width: auto;" onchange="showLoaderAndSubmit()">
+            <option value="">All Years</option>
+            {% for y in years %}
+                <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <select name="month" class="form-select form-select-sm" style="width: auto;" onchange="showLoaderAndSubmit()">
+            <option value="">All Months</option>
+            {% for m in months_list %}
+                <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+         <select name="category" class="form-select form-select-sm" style="width: auto;" onchange="showLoaderAndSubmit()">
+            <option value="">All Categories</option>
+            {% for c in all_categories %}
+                <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+        <!-- Reset Button -->
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm" onclick="showLoader()">Reset</a>
+    </form>
+</div>
+
+<!-- Summary Cards Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-white h-100" style="background-color: #6366f1;">
+            <div class="card-body">
+                <h5 class="card-title opacity-75"><i class="bi bi-wallet2 me-2"></i>Total Expenses</h5>
+                <h2 class="display-6 fw-bold mb-0">₹{{ total_expenses|floatformat:2 }}</h2>
+                <small class="opacity-75">
+                    {% if selected_month and selected_year %}
+                        For {{ selected_month }}/{{ selected_year }}
+                    {% elif selected_year %}
+                         For {{ selected_year }}
+                    {% else %}
+                        All Time
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Category KPI -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-white h-100" style="background-color: #6366f1;">
+            <div class="card-body">
+                <h5 class="card-title opacity-75"><i class="bi bi-tags-fill me-2"></i>Top Category</h5>
+                {% if top_category %}
+                    <h2 class="display-6 fw-bold mb-0">{{ top_category.category }}</h2>
+                    <small class="opacity-75">₹{{ top_category.total|floatformat:2 }}</small>
+                {% else %}
+                    <h2 class="display-6 fw-bold mb-0">-</h2>
+                    <small class="opacity-75">No data</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Count KPI -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-white h-100" style="background-color: #6366f1;">
+            <div class="card-body">
+                <h5 class="card-title opacity-75"><i class="bi bi-receipt me-2"></i>Transactions</h5>
+                <h2 class="display-6 fw-bold mb-0">{{ transaction_count }}</h2>
+                <small class="opacity-75">Total Records</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row g-4 mb-4">
+    <!-- Trend Chart (Stacked) -->
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent fw-bold d-flex justify-content-between">
+                <span>{{ trend_title }} (Stacked by Category)</span>
+                <i class="bi bi-bar-chart-fill text-primary"></i>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Category Chart -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent fw-bold">
+                Category Distribution
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart"></canvas>
+                {% if not categories %}
+                <div class="text-center text-muted mt-5">No data available</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row g-4 mb-4">
+    <!-- Top Expenses -->
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent fw-bold">
+                Top 5 Highest Expenses
+            </div>
+            <div class="card-body">
+                <canvas id="topExpensesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Transactions Table -->
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent fw-bold d-flex justify-content-between align-items-center">
+                <span>Recent Transactions</span>
+                <a href="{% url 'expense-list' %}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 text-start align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">Date</th>
+                                <th>Description</th>
+                                <th class="text-end pe-3">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in recent_transactions %}
+                            <tr>
+                                <td class="ps-3 text-nowrap small">{{ expense.date|date:"d M" }}</td>
+                                <td class="text-truncate" style="max-width: 150px;">{{ expense.description }}</td>
+                                <td class="text-end pe-3 fw-bold">{{ expense.amount }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">None</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Summary Table -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent fw-bold">
+                Category Summary
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 text-start align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Category</th>
+                                <th class="text-end pe-4">Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in category_data %}
+                            <tr>
+                                <td class="ps-4">{{ item.category }}</td>
+                                <td class="text-end pe-4 fw-bold">₹{{ item.total|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ categories|json_script:"categories-data" }}
+{{ category_amounts|json_script:"category-amounts-data" }}
+{{ trend_labels|json_script:"trend-labels" }}
+{{ trend_datasets|json_script:"trend-datasets" }}
+{{ top_labels|json_script:"top-labels" }}
+{{ top_amounts|json_script:"top-amounts" }}
+
+<script>
+    function showLoader() {
+        document.getElementById('page-loader').classList.remove('d-none');
+        document.getElementById('page-loader').classList.add('d-flex');
+    }
+
+    function showLoaderAndSubmit() {
+        showLoader();
+        document.getElementById('filter-form').submit();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Data ---
+        const categories = JSON.parse(document.getElementById('categories-data').textContent);
+        const categoryAmounts = JSON.parse(document.getElementById('category-amounts-data').textContent);
+        const trendLabels = JSON.parse(document.getElementById('trend-labels').textContent);
+        const trendDatasets = JSON.parse(document.getElementById('trend-datasets').textContent);
+        const topLabels = JSON.parse(document.getElementById('top-labels').textContent);
+        const topAmounts = JSON.parse(document.getElementById('top-amounts').textContent);
+
+        // --- 1. Trend Chart (Stacked Bar) ---
+        new Chart(document.getElementById('trendChart'), {
+            type: 'bar',
+            data: {
+                labels: trendLabels,
+                datasets: trendDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
+                scales: {
+                    x: { 
+                        stacked: true,
+                        grid: { display: false } 
+                    },
+                    y: { 
+                        stacked: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' }, 
+                        beginAtZero: true 
+                    }
+                }
+            }
+        });
+
+        // --- 2. Category Chart (Doughnut) ---
+        if (categories.length > 0) {
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: categoryAmounts,
+                        backgroundColor: [
+                            '#38bdf8', '#818cf8', '#c084fc', '#f472b6', '#fb7185', '#22d3ee'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } } 
+                    }
+                }
+            });
+        }
+
+        // --- 3. Top Expenses Chart (Horizontal Bar) ---
+        new Chart(document.getElementById('topExpensesChart'), {
+            type: 'bar',
+            data: {
+                labels: topLabels,
+                datasets: [{
+                    label: 'Amount',
+                    data: topAmounts,
+                    backgroundColor: '#818cf8',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(0,0,0,0.05)' } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
