@@ -163,3 +163,11 @@ a:hover {
 .text-warning {
     color: var(--color-warning) !important;
 }
+
+/* Dark Mode Overrides */
+[data-bs-theme="dark"] .nav-link {
+    color: #ffffff; /* White for dark mode */
+}
+[data-bs-theme="dark"] .nav-link:hover, [data-bs-theme="dark"] .nav-link.active {
+    color: var(--color-success) !important; /* Teal for hover/active */
+}
