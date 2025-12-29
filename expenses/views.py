@@ -256,7 +256,10 @@ class ExpenseListView(generic.ListView):
         category = self.request.GET.get('category')
         search_query = self.request.GET.get('search')
         
-        if year:
+        if year is None:
+            year = datetime.now().year
+            queryset = queryset.filter(date__year=year)
+        elif year:
             queryset = queryset.filter(date__year=year)
         if month:
             queryset = queryset.filter(date__month=month)
@@ -277,6 +280,19 @@ class ExpenseListView(generic.ListView):
         context['years'] = years
         context['categories'] = categories
         context['months_list'] = range(1, 13)
+        
+        # Determine selected year for UI
+        year_param = self.request.GET.get('year')
+        if year_param is None:
+            context['selected_year'] = datetime.now().year
+        elif year_param:
+            try:
+                context['selected_year'] = int(year_param)
+            except ValueError:
+                context['selected_year'] = None
+        else:
+            context['selected_year'] = None
+            
         return context
 
 class ExpenseCreateView(generic.TemplateView):

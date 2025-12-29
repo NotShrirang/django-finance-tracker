@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row fade-in">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+        <div class="list-group shadow-sm">
+            <a href="{% url 'category-list' %}" class="list-group-item list-group-item-action {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="bi bi-tags me-2"></i> Categories
+            </a>
+            <!-- Placeholder for future settings -->
+            <a href="#" class="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true">
+                <i class="bi bi-gear me-2"></i> General (Coming Soon)
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+        {% block settings_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

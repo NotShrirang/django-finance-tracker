@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     {% load static %}
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -46,18 +46,26 @@
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a href="{% url 'home' %}"
-                            class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Dashboard</a>
+                            class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                            Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'expense-list' %}" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">Expenses</a>
+                        <a href="{% url 'expense-list' %}" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
+                            Expenses
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'upload' %}"
-                            class="nav-link {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Upload</a>
+                            class="nav-link {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
+                            Upload
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'category-list' %}"
-                            class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">Settings</a>
+                            class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+                            Settings
+                        </a>
                     </li>
                     
                     <!-- Simple Theme Toggle -->
@@ -70,15 +78,21 @@
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="post" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="nav-link btn btn-link text-decoration-none ms-lg-2">Logout</button>
+                            <button type="submit" class="nav-link btn btn-link text-decoration-none ms-lg-2">
+                                Logout
+                            </button>
                         </form>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a href="{% url 'login' %}" class="nav-link">Login</a>
+                        <a href="{% url 'login' %}" class="nav-link">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'signup' %}" class="btn btn-primary ms-2">Sign Up</a>
+                        <a href="{% url 'signup' %}" class="btn btn-primary ms-2">
+                            <i class="bi bi-person-plus me-1"></i> Sign Up
+                        </a>
                     </li>
                     {% endif %}
                 </ul>

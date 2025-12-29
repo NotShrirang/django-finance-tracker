@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3 fade-in">
     <h1 class="h2 mb-0">Dashboard</h1>
     
     <!-- Filter Form -->
@@ -25,14 +25,16 @@
             {% endfor %}
         </select>
         <!-- Reset Button -->
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm" onclick="showLoader()">Reset</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm" onclick="showLoader()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+        </a>
     </form>
 </div>
 
 <!-- Summary Cards Row -->
 <div class="row g-4 mb-4">
     <div class="col-md-4">
-        <div class="card shadow-lg border-0 h-100">
+        <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.1s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-wallet2 me-2"></i>Total Expenses</h5>
                 <h2 class="display-6 fw-bold mb-0">₹{{ total_expenses|floatformat:2 }}</h2>
@@ -51,7 +53,7 @@
     
     <!-- Top Category KPI -->
     <div class="col-md-4">
-        <div class="card shadow-lg border-0 h-100">
+        <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.2s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-tags-fill me-2"></i>Top Category</h5>
                 {% if top_category %}
@@ -67,7 +69,7 @@
 
     <!-- Transaction Count KPI -->
     <div class="col-md-4">
-        <div class="card shadow-lg border-0 h-100">
+        <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.3s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-receipt me-2"></i>Transactions</h5>
                 <h2 class="display-6 fw-bold mb-0">{{ transaction_count }}</h2>
