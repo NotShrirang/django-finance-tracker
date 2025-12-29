@@ -219,8 +219,29 @@
             totalForms.value = rows.length;
             
             rows.forEach((row, index) => {
-                row.innerHTML = row.innerHTML.replace(/form-\d+-/g, `form-${index}-`);
-                // Also update ID attributes if they exist specifically not handled by replace above
+                // Determine pattern for current row based on its existing content (usually form-N-)
+                // But simpler: just replace ANY form-\d+- with form-index- in the attributes we care about.
+                
+                // Update inputs, selects, textareas
+                const inputs = row.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(/form-\d+-/, `form-${index}-`);
+                    }
+                    if (input.id) {
+                        input.id = input.id.replace(/form-\d+-/, `form-${index}-`);
+                    }
+                });
+
+                // Update labels if any (though we use little labels in this table)
+                row.querySelectorAll('label').forEach(label => {
+                    if (label.htmlFor) {
+                        label.htmlFor = label.htmlFor.replace(/form-\d+-/, `form-${index}-`);
+                    }
+                });
+                
+                // Update hidden DELETE inputs or other specifics if needed
+                // The above generic input handler covers typical django form fields.
             });
         }
     });

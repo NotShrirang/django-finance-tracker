@@ -26,9 +26,12 @@
                             <a href="{% url 'category-edit' category.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
                                 <i class="bi bi-pencil-square text-primary"></i>
                             </a>
-                            <a href="{% url 'category-delete' category.pk %}" class="btn btn-sm btn-link text-decoration-none p-0" title="Delete">
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                    data-url="{% url 'category-delete' category.pk %}"
+                                    data-message="Are you sure you want to delete category '{{ category.name|escapejs }}'? This will NOT delete expenses in this category, but they will be unlinked or require update.">
                                 <i class="bi bi-trash text-danger"></i>
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}

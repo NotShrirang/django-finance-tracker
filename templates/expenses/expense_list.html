@@ -108,9 +108,12 @@
                             <a href="{% url 'expense-edit' expense.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
                                 <i class="bi bi-pencil-square text-primary"></i>
                             </a>
-                            <a href="{% url 'expense-delete' expense.pk %}" class="btn btn-sm btn-link text-decoration-none p-0" title="Delete">
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                    data-url="{% url 'expense-delete' expense.pk %}"
+                                    data-message="Are you sure you want to delete '{{ expense.description|escapejs }}'?">
                                 <i class="bi bi-trash text-danger"></i>
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
