@@ -6,15 +6,80 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
+from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views import generic
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.db.models import Sum, Q
-from .models import Expense, Category, Income
-from .forms import ExpenseForm, IncomeForm
+from .models import Expense, Category, Income, RecurringTransaction
+from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
 import pandas as pd
-from datetime import datetime, date
 import calendar
+from datetime import datetime, date, timedelta
+
+# --------------------
+# Mixins
+# --------------------
+
+class RecurringTransactionMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            self.process_recurring_transactions(request.user)
+        return super().dispatch(request, *args, **kwargs)
+
+    def process_recurring_transactions(self, user):
+        today = date.today()
+        recurring_txs = RecurringTransaction.objects.filter(user=user, is_active=True)
+        
+        for rt in recurring_txs:
+            if not rt.last_processed_date:
+                current_date = rt.start_date
+            else:
+                current_date = self.get_next_date(rt.last_processed_date, rt.frequency)
+
+            while current_date <= today:
+                description = f"{rt.description} (Recurring)"
+                if rt.transaction_type == 'EXPENSE':
+                    Expense.objects.get_or_create(
+                        user=user,
+                        date=current_date,
+                        amount=rt.amount,
+                        description=description,
+                        category=rt.category or 'Uncategorized'
+                    )
+                else:
+                    Income.objects.get_or_create(
+                        user=user,
+                        date=current_date,
+                        amount=rt.amount,
+                        description=description,
+                        source=rt.source or 'Other'
+                    )
+                
+                rt.last_processed_date = current_date
+                rt.save()
+                current_date = self.get_next_date(current_date, rt.frequency)
+
+    def get_next_date(self, current_date, frequency):
+        if frequency == 'DAILY':
+            return current_date + timedelta(days=1)
+        elif frequency == 'WEEKLY':
+            return current_date + timedelta(weeks=1)
+        elif frequency == 'MONTHLY':
+            month = current_date.month % 12 + 1
+            year = current_date.year + (current_date.month // 12)
+            try:
+                return current_date.replace(year=year, month=month)
+            except ValueError:
+                # Handle Feb 29/30/31
+                next_month = current_date + timedelta(days=31)
+                return next_month.replace(day=1) - timedelta(days=1)
+        elif frequency == 'YEARLY':
+            try:
+                return current_date.replace(year=current_date.year + 1)
+            except ValueError:
+                return current_date.replace(year=current_date.year + 1, month=2, day=28)
+        return current_date + timedelta(days=365)
 
 
 # Custom signup view to log user in immediately
@@ -343,7 +408,7 @@ def upload_view(request):
     
     return render(request, 'upload.html', {'years': years, 'current_year': current_year})
 
-class ExpenseListView(LoginRequiredMixin, generic.ListView):
+class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
     model = Expense
     template_name = 'expenses/expense_list.html'
     context_object_name = 'expenses'
@@ -567,7 +632,7 @@ def export_expenses(request):
 # Income Views
 # --------------------
 
-class IncomeListView(LoginRequiredMixin, generic.ListView):
+class IncomeListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
     model = Income
     template_name = 'expenses/income_list.html'
     context_object_name = 'incomes'
@@ -639,7 +704,7 @@ class IncomeDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 
 
-class CalendarView(LoginRequiredMixin, TemplateView):
+class CalendarView(LoginRequiredMixin, RecurringTransactionMixin, TemplateView):
     template_name = 'expenses/calendar.html'
 
     def get_context_data(self, **kwargs):
@@ -724,3 +789,126 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         context['search_query'] = search_query
         
         return context
+
+
+class BudgetDashboardView(LoginRequiredMixin, RecurringTransactionMixin, TemplateView):
+    template_name = 'expenses/budget_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        today = date.today()
+        
+        month = int(self.request.GET.get('month', today.month))
+        year = int(self.request.GET.get('year', today.year))
+        
+        categories = Category.objects.filter(user=user)
+        budget_data = []
+        
+        total_budget = 0
+        categorized_spent = 0
+        
+        # Calculate total spending across ALL expenses for the month
+        grand_total_spent = Expense.objects.filter(
+            user=user,
+            date__year=year,
+            date__month=month
+        ).aggregate(Total=Sum('amount'))['Total'] or 0
+
+        for category in categories:
+            spent = Expense.objects.filter(
+                user=user,
+                category=category.name,
+                date__year=year,
+                date__month=month
+            ).aggregate(Total=Sum('amount'))['Total'] or 0
+            
+            percentage = (spent / category.limit * 100) if category.limit and category.limit > 0 else 0
+            
+            budget_data.append({
+                'category': category,
+                'spent': spent,
+                'limit': category.limit,
+                'percentage': min(percentage, 100),
+                'actual_percentage': percentage,
+                'remaining': (category.limit - spent) if category.limit and spent <= category.limit else 0,
+                'over_budget': (spent - category.limit) if category.limit and spent > category.limit else 0
+            })
+            
+            if category.limit:
+                total_budget += category.limit
+            categorized_spent += spent
+            
+        context.update({
+            'budget_data': budget_data,
+            'total_budget': total_budget,
+            'total_spent': grand_total_spent,
+            'total_remaining': (total_budget - grand_total_spent) if total_budget > grand_total_spent else 0,
+            'over_budget_amount': (grand_total_spent - total_budget) if grand_total_spent > total_budget else 0,
+            'total_percentage': min((grand_total_spent / total_budget * 100), 100) if total_budget else 0,
+            'actual_total_percentage': (grand_total_spent / total_budget * 100) if total_budget else 0,
+            'month_name': date(year, month, 1).strftime('%B'),
+            'current_month': month,
+            'current_year': year,
+            'months': [(i, calendar.month_name[i]) for i in range(1, 13)],
+            'years': range(today.year - 2, today.year + 2),
+        })
+        return context
+
+# --------------------
+# Recurring Transaction Views
+# --------------------
+
+class RecurringTransactionListView(LoginRequiredMixin, ListView):
+    model = RecurringTransaction
+    template_name = 'expenses/recurring_transaction_list.html'
+    context_object_name = 'recurring_transactions'
+
+    def get_queryset(self):
+        return RecurringTransaction.objects.filter(user=self.request.user).order_by('-created_at')
+
+class RecurringTransactionCreateView(LoginRequiredMixin, CreateView):
+    model = RecurringTransaction
+    form_class = RecurringTransactionForm
+    template_name = 'expenses/recurring_transaction_form.html'
+    success_url = reverse_lazy('recurring-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, 'Recurring transaction created successfully.')
+        return super().form_valid(form)
+
+class RecurringTransactionUpdateView(LoginRequiredMixin, UpdateView):
+    model = RecurringTransaction
+    form_class = RecurringTransactionForm
+    template_name = 'expenses/recurring_transaction_form.html'
+    success_url = reverse_lazy('recurring-list')
+
+    def get_queryset(self):
+        return RecurringTransaction.objects.filter(user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Recurring transaction updated successfully.')
+        return super().form_valid(form)
+
+class RecurringTransactionDeleteView(LoginRequiredMixin, DeleteView):
+    model = RecurringTransaction
+    template_name = 'expenses/recurring_transaction_confirm_delete.html' # Added template_name for consistency
+    success_url = reverse_lazy('recurring-list')
+
+    def get_queryset(self):
+        return RecurringTransaction.objects.filter(user=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Recurring transaction deleted successfully.')
+        return super().delete(request, *args, **kwargs)

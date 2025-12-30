@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense, Category, Income
+from .models import Expense, Category, Income, RecurringTransaction
 
 class ExpenseForm(forms.ModelForm):
     class Meta:
@@ -50,3 +50,48 @@ class IncomeForm(forms.ModelForm):
         if source:
             return source.strip()
         return source
+
+class RecurringTransactionForm(forms.ModelForm):
+    class Meta:
+        model = RecurringTransaction
+        fields = ['transaction_type', 'amount', 'description', 'category', 'source', 'frequency', 'start_date', 'is_active']
+        widgets = {
+            'transaction_type': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleFields()'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'frequency': forms.Select(attrs={'class': 'form-select'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Category field as Select for Expenses
+        if user:
+            categories = Category.objects.filter(user=user).order_by('name')
+            category_choices = [('', '---------')] + [(cat.name, cat.name) for cat in categories]
+            self.fields['category'].widget = forms.Select(choices=category_choices, attrs={'class': 'form-select'})
+        else:
+            self.fields['category'].widget = forms.TextInput(attrs={'class': 'form-control'})
+        
+        self.fields['source'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Salary (For Income only)'})
+        
+        # Ensure fields are optional at form level since we handle them in clean()
+        self.fields['category'].required = False
+        self.fields['source'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        transaction_type = cleaned_data.get('transaction_type')
+        category = cleaned_data.get('category')
+        source = cleaned_data.get('source')
+
+        if transaction_type == 'EXPENSE' and not category:
+            self.add_error('category', 'Category is required for expenses.')
+        
+        if transaction_type == 'INCOME' and not source:
+            self.add_error('source', 'Source is required for income.')
+
+        return cleaned_data

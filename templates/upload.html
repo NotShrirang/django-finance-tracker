@@ -1,44 +1,40 @@
-{% extends 'base.html' %}
+{% extends 'expenses/settings_base.html' %}
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card shadow-lg border-0">
-            <div class="card-body p-5 text-center">
-                <i class="bi bi-cloud-arrow-up text-primary fs-1 mb-3"></i>
-                <h2 class="mb-3">Upload Expenses</h2>
-                <p class="text-muted mb-4">
-                    Upload your Excel file to update your expense records.
-                    Each sheet corresponds to a month.
-                </p>
+{% block settings_content %}
+<div class="card shadow-lg border-0 fade-in">
+    <div class="card-header bg-transparent py-3">
+        <h2 class="h4 mb-0 fw-bold">Upload Expenses</h2>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-4 small">
+            Upload your Excel file to update your expense records. Each sheet corresponds to a month.
+        </p>
 
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-3 text-start">
-                        <label for="year" class="form-label">Select Year</label>
-                        <select name="year" id="year" class="form-select" required>
-                            {% for y in years %}
-                                <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="form-text">This year will be applied to all uploaded records.</div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="formFile" class="form-label d-none">Excel File</label>
-                        <input class="form-control form-control-lg" type="file" id="formFile" name="file"
-                            accept=".xlsx, .xls" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Upload & Process
-                    </button>
-                </form>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="year" class="form-label">Select Year</label>
+                <select name="year" id="year" class="form-select" required>
+                    {% for y in years %}
+                        <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">This year will be applied to all uploaded records.</div>
             </div>
-            <div class="card-footer bg-transparent text-center text-muted small py-3">
-                Supported formats: .xlsx, .xls
+
+            <div class="mb-4">
+                <label for="formFile" class="form-label">Excel File (.xlsx, .xls)</label>
+                <input class="form-control" type="file" id="formFile" name="file"
+                    accept=".xlsx, .xls" required>
             </div>
-        </div>
+
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-cloud-arrow-up me-2"></i>Upload & Process
+            </button>
+        </form>
+    </div>
+    <div class="card-footer bg-transparent text-muted small py-3">
+        Supported formats: .xlsx, .xls
     </div>
 </div>
 {% endblock %}

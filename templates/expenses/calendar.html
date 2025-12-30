@@ -30,7 +30,7 @@
                 </div>
             </form>
             
-            <a href="{% url 'home' %}" class="btn btn-outline-primary btn-sm text-nowrap">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm text-nowrap">
                  Back to Dashboard
             </a>
         </div>
@@ -63,7 +63,7 @@
                          data-bs-html="true"
                          data-bs-custom-class="custom-popover"
                          data-bs-title="<b>{{ day_data.day }} {{ month_name }}</b>"
-                         data-bs-content="{% if day_data.income > 0 %}<div class='text-success mb-1'>Income: <b>₹{{ day_data.income|floatformat:0 }}</b></div>{% endif %}{% if day_data.expense > 0 %}<div class='text-danger mb-1'>Expense: <b>₹{{ day_data.expense|floatformat:0 }}</b></div>{% endif %}{% if day_data.income == 0 and day_data.expense == 0 %}<div class='text-muted mb-1'>No activity</div>{% endif %}<a href='{% url 'expense-list' %}?start_date={{ current_year }}-{{ current_month|stringformat:'02d' }}-{{ day_data.day|stringformat:'02d' }}&end_date={{ current_year }}-{{ current_month|stringformat:'02d' }}-{{ day_data.day|stringformat:'02d' }}' class='btn btn-sm btn-outline-primary w-100 mt-2'>View Details</a>">
+                         data-bs-content="{% if day_data.income > 0 %}<div class='text-success mb-1'>Income: <b>₹{{ day_data.income|floatformat:0 }}</b></div>{% endif %}{% if day_data.expense > 0 %}<div class='text-danger mb-1'>Expense: <b>₹{{ day_data.expense|floatformat:0 }}</b></div>{% endif %}{% if day_data.income == 0 and day_data.expense == 0 %}<div class='text-muted mb-1'>No activity</div>{% endif %}<a href='{% url 'expense-list' %}?start_date={{ current_year }}-{{ current_month|stringformat:'02d' }}-{{ day_data.day|stringformat:'02d' }}&end_date={{ current_year }}-{{ current_month|stringformat:'02d' }}-{{ day_data.day|stringformat:'02d' }}' class='btn btn-sm btn-outline-secondary w-100 mt-2'>View Details</a>">
                         
                         <!-- Date Number & Link -->
                         <div class="d-flex justify-content-between w-100 px-1 mb-1 mb-md-2">

@@ -72,3 +72,31 @@ class Income(models.Model):
 
     def __str__(self):
         return f"{self.date} - {self.source} - {self.amount}"
+
+class RecurringTransaction(models.Model):
+    FREQUENCY_CHOICES = [
+        ('DAILY', 'Daily'),
+        ('WEEKLY', 'Weekly'),
+        ('MONTHLY', 'Monthly'),
+        ('YEARLY', 'Yearly'),
+    ]
+    TRANSACTION_TYPE_CHOICES = [
+        ('EXPENSE', 'Expense'),
+        ('INCOME', 'Income'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+    category = models.CharField(max_length=255, blank=True, null=True) # For Expense
+    source = models.CharField(max_length=255, blank=True, null=True)   # For Income
+    frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES)
+    start_date = models.DateField()
+    last_processed_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.transaction_type} - {self.description} ({self.frequency})"

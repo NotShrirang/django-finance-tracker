@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h3 fw-bold mb-0">Budget Dashboard</h2>
+            <div class="d-flex gap-2">
+                <form method="get" class="d-flex gap-2 align-items-center">
+                    <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for m_num, m_name in months %}
+                            <option value="{{ m_num }}" {% if m_num == current_month %}selected{% endif %}>
+                                {{ m_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>
+                                {{ y }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+        <p class="text-muted small mt-1">Overview of your spending vs. category limits for {{ month_name }} {{ current_year }}</p>
+    </div>
+
+    <!-- Overall Summary -->
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h4 class="h6 text-muted text-uppercase fw-bold mb-1">Total Budget Goal</h4>
+                        <p class="h3 fw-bold mb-0">₹{{ total_spent|floatformat:2 }} <span class="text-muted h5">/ ₹{{ total_budget|floatformat:2 }}</span></p>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="progress" style="height: 12px; border-radius: 6px;">
+                            <div class="progress-bar {% if total_percentage > 100 %}bg-danger{% elif total_percentage > 85 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ total_percentage }}%" 
+                                 aria-valuenow="{{ total_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span class="small text-muted">{{ total_percentage|floatformat:1 }}% Used</span>
+                            <span class="small {% if total_spent > total_budget %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                {% if total_spent > total_budget %}
+                                    Over budget by ₹{{ over_budget_amount|floatformat:2 }}
+                                {% else %}
+                                    ₹{{ total_remaining|floatformat:2 }} remaining
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="col-12">
+        <div class="row g-4">
+            {% for data in budget_data %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="h6 fw-bold mb-0">{{ data.category.name }}</h5>
+                                <small class="text-muted">Spent: ₹{{ data.spent|floatformat:0 }}</small>
+                            </div>
+                            {% if data.limit %}
+                                <div class="text-end">
+                                    <span class="badge {% if data.actual_percentage > 100 %}bg-danger{% elif data.actual_percentage > 80 %}bg-warning{% else %}bg-success-subtle text-success{% endif %}">
+                                        {{ data.actual_percentage|floatformat:0 }}%
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if data.limit %}
+                            <div class="progress" style="height: 8px; border-radius: 4px;">
+                                <div class="progress-bar {% if data.actual_percentage > 100 %}bg-danger{% elif data.actual_percentage > 85 %}bg-warning{% else %}bg-primary{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ data.percentage }}%" 
+                                     aria-valuenow="{{ data.percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2 small">
+                                <span class="text-muted">Limit: ₹{{ data.limit|floatformat:0 }}</span>
+                                <span class="{% if data.spent > data.limit %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                    {% if data.spent > data.limit %}
+                                        +₹{{ data.over_budget|floatformat:0 }}
+                                    {% else %}
+                                        ₹{{ data.remaining|floatformat:0 }} left
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-light py-2 px-3 mb-0 small border-0 bg-body-tertiary">
+                                <i class="bi bi-info-circle me-1"></i> No limit set
+                                <a href="{% url 'category-edit' data.category.pk %}" class="btn-link ms-1">Set limit</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-inbox text-muted display-4"></i>
+                <p class="text-muted mt-3">No categories found. Start by adding some categories to your settings.</p>
+                <a href="{% url 'category-create' %}" class="btn btn-primary">Add Category</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

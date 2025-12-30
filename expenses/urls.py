@@ -5,6 +5,7 @@ urlpatterns = [
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('', views.LandingPageView.as_view(), name='landing'),
     path('dashboard/', views.home_view, name='home'),
+    path('budget/', views.BudgetDashboardView.as_view(), name='budget'),
     path('upload/', views.upload_view, name='upload'),
     path('export/', views.export_expenses, name='export-expenses'),
     path('expenses/', views.ExpenseListView.as_view(), name='expense-list'),
@@ -25,4 +26,9 @@ urlpatterns = [
     # Calendar
     path('calendar/', views.CalendarView.as_view(), name='calendar'),
     path('calendar/<int:year>/<int:month>/', views.CalendarView.as_view(), name='calendar-month'),
+    # Recurring Transactions
+    path('recurring/', views.RecurringTransactionListView.as_view(), name='recurring-list'),
+    path('recurring/create/', views.RecurringTransactionCreateView.as_view(), name='recurring-create'),
+    path('recurring/<int:pk>/edit/', views.RecurringTransactionUpdateView.as_view(), name='recurring-edit'),
+    path('recurring/<int:pk>/delete/', views.RecurringTransactionDeleteView.as_view(), name='recurring-delete'),
 ]

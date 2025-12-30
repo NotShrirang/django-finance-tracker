@@ -117,9 +117,11 @@
 
                     {% endif %}
 
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{% url 'expense-list' %}" class="btn btn-outline-primary">Cancel</a>
-                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                    <div class="d-flex justify-content-start gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i> Save Changes
+                        </button>
+                        <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
                     </div>
                 </form>
             </div>

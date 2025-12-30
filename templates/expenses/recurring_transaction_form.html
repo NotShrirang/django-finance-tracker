@@ -1,0 +1,107 @@
+{% extends 'expenses/settings_base.html' %}
+
+{% block settings_content %}
+<div class="card shadow-lg border-0 fade-in">
+    <div class="card-header bg-transparent py-3">
+        <h2 class="h4 mb-0 fw-bold">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Recurring Transaction</h2>
+    </div>
+
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Type</label>
+                    {{ form.transaction_type }}
+                    {% if form.transaction_type.errors %}
+                        <div class="text-danger small">{{ form.transaction_type.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Frequency</label>
+                    {{ form.frequency }}
+                    {% if form.frequency.errors %}
+                        <div class="text-danger small">{{ form.frequency.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Amount</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                        <div class="text-danger small">{{ form.amount.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Start Date</label>
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                        <div class="text-danger small">{{ form.start_date.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12" id="categoryGroup">
+                    <label class="form-label">Category (For Expense)</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-danger small">{{ form.category.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12" id="sourceGroup" style="display: none;">
+                    <label class="form-label">Source (For Income)</label>
+                    {{ form.source }}
+                    {% if form.source.errors %}
+                        <div class="text-danger small">{{ form.source.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label">Active</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-lg me-1"></i> Save Task
+                </button>
+                <a href="{% url 'recurring-list' %}" class="btn btn-outline-secondary px-4 ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleFields() {
+        const typeSelect = document.querySelector('[name="transaction_type"]');
+        const categoryGroup = document.getElementById('categoryGroup');
+        const sourceGroup = document.getElementById('sourceGroup');
+
+        if (typeSelect.value === 'EXPENSE') {
+            categoryGroup.style.display = 'block';
+            sourceGroup.style.display = 'none';
+        } else {
+            categoryGroup.style.display = 'none';
+            sourceGroup.style.display = 'block';
+        }
+    }
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', toggleFields);
+</script>
+{% endblock %}

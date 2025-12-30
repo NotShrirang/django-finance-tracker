@@ -1,0 +1,82 @@
+{% extends 'expenses/settings_base.html' %}
+
+{% block settings_content %}
+<div class="card shadow-lg border-0 fade-in">
+    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+        <h2 class="h4 mb-0 fw-bold">Recurring Transactions</h2>
+        <a href="{% url 'recurring-create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Add Recurring
+        </a>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 text-start align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Description</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Frequency</th>
+                        <th>Next Due</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rt in recurring_transactions %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="fw-bold">{{ rt.description }}</span><br>
+                            <small class="text-muted">
+                                {% if rt.transaction_type == 'EXPENSE' %}
+                                    Category: {{ rt.category }}
+                                {% else %}
+                                    Source: {{ rt.source }}
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge {% if rt.transaction_type == 'EXPENSE' %}bg-danger-subtle text-danger{% else %}bg-success-subtle text-success{% endif %}">
+                                {{ rt.get_transaction_type_display }}
+                            </span>
+                        </td>
+                        <td class="fw-bold">₹{{ rt.amount|floatformat:2 }}</td>
+                        <td>{{ rt.get_frequency_display }}</td>
+                        <td>
+                            {% if rt.last_processed_date %}
+                                {{ rt.last_processed_date }}
+                            {% else %}
+                                {{ rt.start_date }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rt.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'recurring-edit' rt.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
+                                <i class="bi bi-pencil-square text-primary"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                    data-url="{% url 'recurring-delete' rt.pk %}"
+                                    data-message="Are you sure you want to delete this recurring transaction? Actual entries already created will not be affected.">
+                                <i class="bi bi-trash text-danger"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">No recurring transactions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

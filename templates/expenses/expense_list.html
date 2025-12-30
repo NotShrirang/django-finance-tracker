@@ -13,7 +13,7 @@
            <!-- <a href="{% url 'upload' %}" class="btn btn-outline-primary btn-sm">
                <i class="bi bi-cloud-arrow-up me-1"></i> Bulk Upload
            </a> -->
-           <a href="{% url 'export-expenses' %}?{{ request.GET.urlencode }}" class="btn btn-outline-primary btn-sm">
+           <a href="{% url 'export-expenses' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export
             </a>
         </div>
@@ -79,7 +79,7 @@
                 <button type="submit" class="btn btn-primary btn-sm" onclick="showLoader()">
                     <i class="bi bi-search me-1"></i> Search
                 </button>
-                <a href="{% url 'expense-list' %}" class="btn btn-outline-primary btn-sm" onclick="showLoader()">
+                <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary btn-sm" onclick="showLoader()">
                     <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
                 </a>
             </div>

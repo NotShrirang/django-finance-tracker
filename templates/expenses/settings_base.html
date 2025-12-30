@@ -8,6 +8,12 @@
             <a href="{% url 'category-list' %}" class="list-group-item list-group-item-action {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
                 <i class="bi bi-tags me-2"></i> Categories
             </a>
+            <a href="{% url 'recurring-list' %}" class="list-group-item list-group-item-action {% if 'recurring' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="bi bi-clock-history me-2"></i> Recurring Tasks
+            </a>
+            <a href="{% url 'upload' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
+                <i class="bi bi-cloud-arrow-up me-2"></i> Upload Data
+            </a>
             <!-- Placeholder for future settings -->
             <a href="#" class="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true">
                 <i class="bi bi-gear me-2"></i> General (Coming Soon)
