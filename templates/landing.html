@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Master Your Money</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #00f260 0%, #0575e6 100%);
+            --surface-color: #1a1d21;
+            --bg-color: #111315;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .brand-font {
+            font-family: 'Clash Display', sans-serif;
+        }
+
+        .hero-section {
+            padding: 140px 0 80px 0;
+            background: radial-gradient(circle at top center, rgba(5, 117, 230, 0.15) 0%, rgba(0,0,0,0) 60%);
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(17, 19, 21, 0.8);
+        }
+
+        .cta-button {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 117, 230, 0.3);
+            color: white;
+        }
+
+        .feature-card {
+            background: var(--surface-color);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(5, 117, 230, 0.3);
+            background: linear-gradient(180deg, var(--surface-color) 0%, rgba(26, 29, 33, 0.8) 100%);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-badge {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top border-bottom border-secondary border-opacity-10">
+        <div class="container d-flex justify-content-between">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                <i class="bi bi-graph-up-arrow text-primary"></i>
+                <span>FinanceTracker</span>
+            </a>
+            <div class="d-flex gap-2 gap-md-3">
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 px-md-4">Login</a>
+                <a href="{% url 'signup' %}" class="btn btn-light btn-sm rounded-pill px-3 px-md-4 fw-bold">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="stats-badge">
+                        <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                        <span class="small text-muted">Smart Financial Planning</span>
+                    </div>
+                    <h1 class="display-3 fw-bold mb-4 lh-tight">
+                        Master Your Money <br>
+                        <span class="text-gradient">Build Your Wealth.</span>
+                    </h1>
+                    <p class="lead text-muted mb-5" style="max-width: 500px;">
+                        Track expenses, analyze spending habits, and visualize your financial future with our modern, intuitive analytics platform.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <a href="{% url 'signup' %}" class="cta-button text-decoration-none text-center">Get Started Free</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary rounded-pill px-4 py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                             Log In
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="position-relative">
+                        <!-- Abstract Visual Pattern -->
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(5, 117, 230, 0.1) 0%, rgba(0,0,0,0) 70%); z-index: -1;"></div>
+                        
+                        <!-- Floating Glass Cards (Mockup) -->
+                        <div class="p-4" style="background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); transform: rotate(-2deg);">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h5 class="mb-0">Total Balance</h5>
+                                    <small class="text-muted">December 2025</small>
+                                </div>
+                                <div class="bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill small">
+                                    +12.4%
+                                </div>
+                            </div>
+                            <h2 class="mb-4">₹45,231.89</h2>
+                            <div class="d-flex gap-2 align-items-end" style="height: 60px;">
+                                <div class="w-100 bg-primary bg-opacity-25 rounded-top" style="height: 40%"></div>
+                                <div class="w-100 bg-primary bg-opacity-50 rounded-top" style="height: 70%"></div>
+                                <div class="w-100 bg-primary rounded-top" style="height: 55%"></div>
+                                <div class="w-100 bg-primary bg-opacity-75 rounded-top" style="height: 85%"></div>
+                                <div class="w-100 bg-primary bg-opacity-25 rounded-top" style="height: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5" style="background: #111315;">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="h1 fw-bold mb-3">Everything you need</h2>
+                <p class="text-muted">Streamlined tools for complete financial control</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card p-0 overflow-hidden">
+                        <div class="feature-img-container bg-dark bg-opacity-50" style="height: 220px;">
+                            <img src="{% static 'img/landing_calendar_mockup.webp' %}" alt="Calendar Interface" class="w-100 h-100 object-fit-cover opacity-75" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary" style="display: none;">
+                                <i class="bi bi-calendar-range fs-1 opacity-25"></i>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <i class="bi bi-calendar-check feature-icon"></i>
+                            <h3 class="h4 fw-bold mb-3">Smart Calendar</h3>
+                            <p class="text-muted mb-0">Visualize your financial month at a glance. Our responsive calendar aggregates daily income and expenses, allowing you to spot spending patterns instantly. Click any date to drill down into specific transactions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card p-0 overflow-hidden">
+                        <div class="feature-img-container bg-dark bg-opacity-50" style="height: 220px;">
+                            <img src="{% static 'img/landing_analytics_mockup.webp' %}" alt="Analytics Dashboard" class="w-100 h-100 object-fit-cover opacity-75" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary" style="display: none;">
+                                <i class="bi bi-graph-up fs-1 opacity-25"></i>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <i class="bi bi-pie-chart feature-icon"></i>
+                            <h3 class="h4 fw-bold mb-3">Visual Analytics</h3>
+                            <p class="text-muted mb-0">Stop guessing where your money goes. Our interactive charts breakdown spending by category, helping you identify budget leaks. Track your income vs. expense trends over time with beautiful visualizations.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card p-0 overflow-hidden">
+                        <div class="feature-img-container bg-dark bg-opacity-50" style="height: 220px;">
+                            <img src="{% static 'img/landing_security_mockup.webp' %}" alt="Security Shield" class="w-100 h-100 object-fit-cover opacity-75" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary" style="display: none;">
+                                <i class="bi bi-shield-lock fs-1 opacity-25"></i>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <i class="bi bi-shield-check feature-icon"></i>
+                            <h3 class="h4 fw-bold mb-3">Secure & Private</h3>
+                            <p class="text-muted mb-0">Your financial data is yours alone. We employ industry-standard encryption and strict privacy policies. No ads, no data selling, just a secure vault for your personal finance journey.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 border-top border-secondary border-opacity-10 text-center text-muted small">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 FinanceTracker. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

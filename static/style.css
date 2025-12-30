@@ -34,12 +34,50 @@ body {
 }
 
 /* --- Global Dashboard Theme Overrides --- */
+
 :root {
     --color-primary: #023047;   /* Dark Blue */
     --color-secondary: #8ECAE6; /* Light Blue */
     --color-success: #219EBC;   /* Teal */
     --color-danger: #FB8500;    /* Orange */
     --color-warning: #FFB703;   /* Yellow */
+    --bg-color: #f8f9fa;        /* Light mode bg default */
+    --surface-color: #ffffff;
+    --text-main: #212529;
+    --primary-gradient: linear-gradient(135deg, #00f260 0%, #0575e6 100%);
+}
+
+[data-bs-theme="dark"] {
+    --color-primary: #0575e6;   /* Bright Blue for Dark Mode */
+    --color-background: #111315; /* Landing Page BG */
+    --color-surface: #1a1d21;    /* Landing Page Surface */
+    --color-text: #ffffff;
+}
+
+body {
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-bs-theme="dark"] body {
+    background-color: var(--color-background) !important;
+    color: var(--color-text) !important;
+}
+
+h1, h2, h3, .h1, .h2, .h3, .navbar-brand {
+    font-family: 'Clash Display', 'Outfit', sans-serif;
+}
+
+/* Navbar Unification */
+[data-bs-theme="dark"] .navbar {
+    background-color: rgba(17, 19, 21, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: var(--color-surface);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Navbar */
@@ -49,22 +87,32 @@ body {
 
 /* Primary Button (Teal - Custom) */
 .btn-primary {
-    background-color: var(--color-success);
-    border-color: var(--color-success);
+    background: var(--primary-gradient);
+    border: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
-    background-color: #1a7fa8;
-    border-color: #1a7fa8;
+    opacity: 0.9;
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 12px rgba(5, 117, 230, 0.3);
 }
 
 /* Success Button (Teal) */
 .btn-success {
-    background-color: var(--color-success);
-    border-color: var(--color-success);
+    background: var(--primary-gradient);
+    border: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .btn-success:hover, .btn-success:active, .btn-success:focus {
-    background-color: #1a7fa8;
-    border-color: #1a7fa8;
+    opacity: 0.9;
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 12px rgba(0, 242, 96, 0.3);
 }
 
 /* Danger Button (Orange) */
@@ -83,6 +131,7 @@ body {
 a {
     color: var(--color-primary);
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 a:hover {
     color: var(--color-success);
@@ -92,10 +141,13 @@ a:hover {
 .btn-outline-primary {
     color: var(--color-success);
     border-color: var(--color-success);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .btn-outline-primary:hover, .btn-outline-primary:active {
-    background-color: var(--color-success) !important;
-    border-color: var(--color-success) !important;
+    background: var(--primary-gradient) !important;
+    border: 1px solid transparent !important;
     color: #fff !important;
 }
 

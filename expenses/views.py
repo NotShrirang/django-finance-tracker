@@ -23,6 +23,14 @@ class SignUpView(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
 
+class LandingPageView(TemplateView):
+    template_name = 'landing.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
+
 @login_required
 def home_view(request):
     """
@@ -552,6 +560,8 @@ def export_expenses(request):
 
     for expense in expenses:
         writer.writerow([expense.date, expense.category, expense.description, expense.amount])
+
+    return response
 
 # --------------------
 # Income Views
