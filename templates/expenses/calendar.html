@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow-lg border-0 fade-in">
+    <!-- Header -->
+    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'calendar-month' prev_year prev_month %}" class="btn btn-sm">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <h2 class="h4 mb-0 fw-bold">{{ month_name }} {{ current_year }}</h2>
+            <a href="{% url 'calendar-month' next_year next_month %}" class="btn btn-sm">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+        <div>
+            <a href="{% url 'home' %}" class="btn btn-outline-primary btn-sm">
+                 Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="card-body p-0">
+        <!-- Weekday Headers -->
+        <div class="d-grid text-center border-bottom bg-body-tertiary" style="grid-template-columns: repeat(7, 1fr);">
+            <div class="p-2 fw-bold text-muted small">Sun</div>
+            <div class="p-2 fw-bold text-muted small">Mon</div>
+            <div class="p-2 fw-bold text-muted small">Tue</div>
+            <div class="p-2 fw-bold text-muted small">Wed</div>
+            <div class="p-2 fw-bold text-muted small">Thu</div>
+            <div class="p-2 fw-bold text-muted small">Fri</div>
+            <div class="p-2 fw-bold text-muted small">Sat</div>
+        </div>
+
+        <!-- Days -->
+        {% for week in calendar_data %}
+        <div class="d-grid" style="grid-template-columns: repeat(7, 1fr);">
+            {% for day_data in week %}
+                {% if day_data %}
+                    <div class="border-end border-bottom p-2 day-cell d-flex flex-column align-items-center align-items-md-stretch" 
+                         style="min-height: 100px; position: relative; cursor: pointer;"
+                         tabindex="0"
+                         data-bs-toggle="popover"
+                         data-bs-trigger="focus"
+                         data-bs-placement="top"
+                         data-bs-html="true"
+                         data-bs-custom-class="custom-popover"
+                         data-bs-title="<b>{{ day_data.day }} {{ month_name }}</b>"
+                         data-bs-content="{% if day_data.income > 0 %}<div class='text-success mb-1'>Income: <b>₹{{ day_data.income|floatformat:0 }}</b></div>{% endif %}{% if day_data.expense > 0 %}<div class='text-danger'>Expense: <b>₹{{ day_data.expense|floatformat:0 }}</b></div>{% endif %}{% if day_data.income == 0 and day_data.expense == 0 %}<div class='text-muted'>No activity</div>{% endif %}">
+                        
+                        <!-- Date Number -->
+                        <div class="small fw-bold mb-1 mb-md-2">
+                            {{ day_data.day }}
+                        </div>
+
+                        <!-- Desktop Financials (Text Badges) -->
+                        <div class="d-none d-md-flex flex-column gap-1">
+                            {% if day_data.income > 0 %}
+                            <div class="badge text-bg-success text-start w-100 fw-normal text-truncate">
+                                + ₹{{ day_data.income|floatformat:0 }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if day_data.expense > 0 %}
+                            <div class="badge text-bg-danger text-start w-100 fw-normal text-truncate">
+                                - ₹{{ day_data.expense|floatformat:0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Mobile Financials (Dots) -->
+                        <div class="d-flex d-md-none gap-1 mt-1">
+                            {% if day_data.income > 0 %}
+                                <div class="rounded-circle bg-success" style="width: 6px; height: 6px;"></div>
+                            {% endif %}
+                            {% if day_data.expense > 0 %}
+                                <div class="rounded-circle bg-danger" style="width: 6px; height: 6px;"></div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                {% else %}
+                    <!-- Empty Cell (Padding) -->
+                    <div class="border-end border-bottom p-2 bg-light opacity-25" style="min-height: 100px;"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
+    });
+</script>
+
+<style>
+    /* Ensure the grid borders align nicely */
+    .d-grid > div:last-child {
+        border-right: none !important;
+    }
+    
+    /* Mobile optimization */
+    @media (max-width: 768px) {
+        .day-cell {
+            min-height: 60px !important; /* Smaller height for mobile */
+            padding: 0.25rem !important;
+        }
+    }
+</style>
+{% endblock %}

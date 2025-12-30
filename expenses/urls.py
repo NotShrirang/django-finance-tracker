@@ -20,4 +20,8 @@ urlpatterns = [
     path('income/add/', views.IncomeCreateView.as_view(), name='income-create'),
     path('income/<int:pk>/edit/', views.IncomeUpdateView.as_view(), name='income-edit'),
     path('income/<int:pk>/delete/', views.IncomeDeleteView.as_view(), name='income-delete'),
+
+    # Calendar
+    path('calendar/', views.CalendarView.as_view(), name='calendar'),
+    path('calendar/<int:year>/<int:month>/', views.CalendarView.as_view(), name='calendar-month'),
 ]
