@@ -39,7 +39,7 @@ body {
     --color-primary: #023047;   /* Dark Blue */
     --color-secondary: #8ECAE6; /* Light Blue */
     --color-success: #219EBC;   /* Teal */
-    --color-danger: #FB8500;    /* Orange */
+    --color-danger: #dc3545;    /* Red */
     --color-warning: #FFB703;   /* Yellow */
     --bg-color: #f8f9fa;        /* Light mode bg default */
     --surface-color: #ffffff;
@@ -115,15 +115,15 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand {
     box-shadow: 0 4px 12px rgba(0, 242, 96, 0.3);
 }
 
-/* Danger Button (Orange) */
+/* Danger Button (Red) */
 .btn-danger {
     background-color: var(--color-danger);
     border-color: var(--color-danger);
     color: #fff;
 }
 .btn-danger:hover, .btn-danger:active, .btn-danger:focus {
-    background-color: #d97300;
-    border-color: #d97300;
+    background-color: #bb2d3b;
+    border-color: #b02a37;
     color: #fff;
 }
 

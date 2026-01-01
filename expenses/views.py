@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 import csv
 from django.forms import modelformset_factory
+from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -930,4 +931,16 @@ class RecurringTransactionDeleteView(LoginRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Recurring transaction deleted successfully.')
+        return super().delete(request, *args, **kwargs)
+
+class AccountDeleteView(LoginRequiredMixin, DeleteView):
+    model = User
+    template_name = 'expenses/account_confirm_delete.html'
+    success_url = reverse_lazy('landing')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Your account has been successfully deleted. We're sorry to see you go!")
         return super().delete(request, *args, **kwargs)
