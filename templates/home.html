@@ -48,7 +48,15 @@
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.0s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-cash-coin me-2"></i>Total Income</h5>
-                <h2 class="display-6 fw-bold mb-0">₹{{ total_income|floatformat:0 }}</h2>
+                <div class="d-flex align-items-center mb-0">
+                    <h2 class="display-6 fw-bold mb-0">₹{{ total_income|floatformat:0 }}</h2>
+                    {% if prev_month_data.income_pct is not None %}
+                        <span class="badge rounded-pill {% if prev_month_data.income_pct >= 0 %}bg-success{% else %}bg-danger{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
+                            <i class="bi bi-arrow-{% if prev_month_data.income_pct >= 0 %}up{% else %}down{% endif %}"></i>
+                            {{ prev_month_data.income_pct_abs|floatformat:1 }}%
+                        </span>
+                    {% endif %}
+                </div>
                 <small class="text-muted">
                     {% if start_date %}
                         Custom Range
@@ -63,13 +71,20 @@
             </div>
         </div>
     </div>
-
     <!-- Total Expenses -->
     <div class="col-md-3">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.1s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-wallet2 me-2"></i>Total Expenses</h5>
-                <h2 class="display-6 fw-bold mb-0">₹{{ total_expenses|floatformat:0 }}</h2>
+                <div class="d-flex align-items-center mb-0">
+                    <h2 class="display-6 fw-bold mb-0">₹{{ total_expenses|floatformat:0 }}</h2>
+                    {% if prev_month_data.expense_pct is not None %}
+                        <span class="badge rounded-pill {% if prev_month_data.expense_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
+                            <i class="bi bi-arrow-{% if prev_month_data.expense_pct > 0 %}up{% else %}down{% endif %}"></i>
+                            {{ prev_month_data.expense_pct_abs|floatformat:1 }}%
+                        </span>
+                    {% endif %}
+                </div>
                 <small class="text-muted">
                     {% if start_date %}
                         Custom Range
@@ -90,7 +105,15 @@
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.2s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-piggy-bank me-2"></i>Savings</h5>
-                <h2 class="display-6 fw-bold mb-0">₹{{ savings|floatformat:0 }}</h2>
+                <div class="d-flex align-items-center mb-0">
+                    <h2 class="display-6 fw-bold mb-0">₹{{ savings|floatformat:0 }}</h2>
+                    {% if prev_month_data.savings_pct is not None %}
+                        <span class="badge rounded-pill {% if prev_month_data.savings_pct >= 0 %}bg-success{% else %}bg-danger{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
+                            <i class="bi bi-arrow-{% if prev_month_data.savings_pct >= 0 %}up{% else %}down{% endif %}"></i>
+                            {{ prev_month_data.savings_pct_abs|floatformat:1 }}%
+                        </span>
+                    {% endif %}
+                </div>
                 <small class="text-muted">
                     {% if start_date %}
                         Custom Range
@@ -147,7 +170,7 @@
                 Income vs Expenses
             </div>
             <div class="card-body">
-                <div style="height: 200px;">
+                <div style="height: 250px; width: 100%;">
                     <canvas id="incomeExpensesChart"></canvas>
                 </div>
             </div>
@@ -164,7 +187,9 @@
                 <span>{{ trend_title }} (Stacked by Category)</span>
             </div>
             <div class="card-body">
-                <canvas id="trendChart"></canvas>
+                <div style="height: 350px; width: 100%;">
+                    <canvas id="trendChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -175,7 +200,9 @@
                 Category Distribution
             </div>
             <div class="card-body">
-                <canvas id="categoryChart"></canvas>
+                <div style="height: 320px; width: 100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
                 {% if not categories %}
                 <div class="text-center text-muted mt-5">No data available</div>
                 {% endif %}
@@ -193,7 +220,9 @@
                 Top 5 Highest Expenses
             </div>
             <div class="card-body">
-                <canvas id="topExpensesChart" height="200"></canvas>
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="topExpensesChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -205,7 +234,9 @@
                 Budget vs Spent (Categories with Monthly Limits)
             </div>
             <div class="card-body">
-                <canvas id="budgetChart" height="200"></canvas>
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="budgetChart"></canvas>
+                </div>
                 {% if not category_limits %}
                 <div class="text-center text-muted mt-3">No categories with limits set</div>
                 {% endif %}
@@ -421,9 +452,18 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
                 scales: {
-                    x: { stacked: true, grid: { display: false } },
+                    x: { 
+                        stacked: true, 
+                        grid: { display: false },
+                        ticks: {
+                            autoSkip: true,
+                            maxRotation: 45,
+                            minRotation: 0,
+                            font: { size: 11 }
+                        }
+                    },
                     y: { stacked: true, grid: { color: currentColors.grid }, beginAtZero: true }
                 }
             }

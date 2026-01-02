@@ -269,6 +269,37 @@ def home_view(request):
     top_category = category_data[0] if category_data else None
     
     savings = total_income - total_expenses
+
+    # Calculate MoM Changes if a specific month is selected
+    prev_month_data = None
+    if selected_month and selected_year:
+        # Calculate previous month and year
+        if selected_month == 1:
+            prev_month = 12
+            prev_year = selected_year - 1
+        else:
+            prev_month = selected_month - 1
+            prev_year = selected_year
+
+        prev_expenses = Expense.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).aggregate(Sum('amount'))['amount__sum'] or 0
+        prev_income = Income.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).aggregate(Sum('amount'))['amount__sum'] or 0
+        prev_savings = prev_income - prev_expenses
+
+        def calc_pct(current, previous):
+            if previous == 0:
+                return None
+            return ((current - previous) / previous) * 100
+
+        prev_month_data = {
+            'income_pct': calc_pct(total_income, prev_income),
+            'expense_pct': calc_pct(total_expenses, prev_expenses),
+            'savings_pct': calc_pct(savings, prev_savings),
+        }
+        # Add absolute values for template display
+        for key in list(prev_month_data.keys()):
+            val = prev_month_data[key]
+            if val is not None:
+                prev_month_data[f'{key}_abs'] = abs(val)
     
     context = {
         'total_income': total_income,
@@ -294,6 +325,7 @@ def home_view(request):
         'top_category': top_category,
         'start_date': start_date,
         'end_date': end_date,
+        'prev_month_data': prev_month_data,
     }
     return render(request, 'home.html', context)
 
@@ -868,6 +900,30 @@ class BudgetDashboardView(LoginRequiredMixin, RecurringTransactionMixin, Templat
             'total_percentage': min((grand_total_spent / total_budget * 100), 100) if total_budget else 0,
             'actual_total_percentage': (grand_total_spent / total_budget * 100) if total_budget else 0,
             'month_name': date(year, month, 1).strftime('%B'),
+        })
+
+        # MoM Calculation for Budget Dashboard
+        if month == 1:
+            prev_month = 12
+            prev_year = year - 1
+        else:
+            prev_month = month - 1
+            prev_year = year
+
+        prev_spent = Expense.objects.filter(
+            user=user,
+            date__year=prev_year,
+            date__month=prev_month
+        ).aggregate(Total=Sum('amount'))['Total'] or 0
+
+        if prev_spent > 0:
+            context['spent_mom_pct'] = ((grand_total_spent - prev_spent) / prev_spent) * 100
+            context['spent_mom_pct_abs'] = abs(context['spent_mom_pct'])
+        else:
+            context['spent_mom_pct'] = None
+            context['spent_mom_pct_abs'] = None
+
+        context.update({
             'current_month': month,
             'current_year': year,
             'months': [(i, calendar.month_name[i]) for i in range(1, 13)],

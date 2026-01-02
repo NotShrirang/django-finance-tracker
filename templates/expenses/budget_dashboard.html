@@ -34,7 +34,16 @@
                 <div class="row align-items-center">
                     <div class="col-md-4">
                         <h4 class="h6 text-muted text-uppercase fw-bold mb-1">Total Budget Goal</h4>
-                        <p class="h3 fw-bold mb-0">₹{{ total_spent|floatformat:2 }} <span class="text-muted h5">/ ₹{{ total_budget|floatformat:2 }}</span></p>
+                        <div class="d-flex align-items-center mb-0">
+                            <p class="h3 fw-bold mb-0">₹{{ total_spent|floatformat:2 }}</p>
+                            {% if spent_mom_pct is not None %}
+                                <span class="badge rounded-pill {% if spent_mom_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.8rem;" title="vs last month">
+                                    <i class="bi bi-arrow-{% if spent_mom_pct > 0 %}up{% else %}down{% endif %}"></i>
+                                    {{ spent_mom_pct_abs|floatformat:1 }}%
+                                </span>
+                            {% endif %}
+                        </div>
+                        <span class="text-muted h5">/ ₹{{ total_budget|floatformat:2 }}</span>
                     </div>
                     <div class="col-md-8">
                         <div class="progress" style="height: 12px; border-radius: 6px;">
