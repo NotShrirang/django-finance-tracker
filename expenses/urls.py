@@ -31,5 +31,6 @@ urlpatterns = [
     path('recurring/create/', views.RecurringTransactionCreateView.as_view(), name='recurring-create'),
     path('recurring/<int:pk>/edit/', views.RecurringTransactionUpdateView.as_view(), name='recurring-edit'),
     path('recurring/<int:pk>/delete/', views.RecurringTransactionDeleteView.as_view(), name='recurring-delete'),
+    path('settings/currency/', views.CurrencyUpdateView.as_view(), name='currency-settings'),
     path('account/delete/', views.AccountDeleteView.as_view(), name='account-delete'),
 ]

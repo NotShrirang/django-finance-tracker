@@ -14,6 +14,9 @@
             <a href="{% url 'upload' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
                 <i class="bi bi-cloud-arrow-up me-2"></i> Upload Data
             </a>
+            <a href="{% url 'currency-settings' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'currency-settings' %}active{% endif %}">
+                <i class="bi bi-coin me-2"></i> Default Currency
+            </a>
             <a href="{% url 'account-delete' %}" class="list-group-item list-group-item-action text-danger fw-bold">
                 <i class="bi bi-person-x me-2"></i> Delete Account
             </a>

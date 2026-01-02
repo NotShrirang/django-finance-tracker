@@ -28,10 +28,12 @@
                 <label for="source" class="form-label small text-muted">Source</label>
                 <input type="text" class="form-control form-control-sm" id="source" name="source" value="{{ filter_form.source }}" placeholder="Search source...">
             </div>
-            <div class="col-md-3">
+            <div class="col-auto">
                 <button type="submit" class="btn btn-primary btn-sm">
                     <i class="bi bi-filter me-1"></i> Filter
                 </button>
+            </div>
+            <div class="col-auto">
                 <a href="{% url 'income-list' %}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-x-circle me-1"></i> Clear
                 </a>

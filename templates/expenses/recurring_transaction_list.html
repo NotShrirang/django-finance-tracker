@@ -41,7 +41,7 @@
                                 {{ rt.get_transaction_type_display }}
                             </span>
                         </td>
-                        <td class="fw-bold">₹{{ rt.amount|floatformat:2 }}</td>
+                        <td class="fw-bold">{{ currency_symbol }}{{ rt.amount|floatformat:2 }}</td>
                         <td>{{ rt.get_frequency_display }}</td>
                         <td>
                             {{ rt.next_due_date }}

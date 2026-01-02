@@ -129,3 +129,22 @@ class RecurringTransaction(models.Model):
 
     def __str__(self):
         return f"{self.transaction_type} - {self.description} ({self.frequency})"
+class UserProfile(models.Model):
+    CURRENCY_CHOICES = [
+        ('₹', 'Indian Rupee (₹)'),
+        ('$', 'US Dollar ($)'),
+        ('€', 'Euro (€)'),
+        ('£', 'Pound Sterling (£)'),
+        ('¥', 'Japanese Yen (¥)'),
+        ('A$', 'Australian Dollar (A$)'),
+        ('C$', 'Canadian Dollar (C$)'),
+        ('CHF', 'Swiss Franc (CHF)'),
+        ('元', 'Chinese Yuan (元)'),
+        ('₩', 'South Korean Won (₩)'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES, default='₹')
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"

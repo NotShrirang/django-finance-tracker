@@ -40,6 +40,26 @@
         </a>
     </form>
 </div>
+<div class="row g-3 mb-4 fade-in d-none d-md-block" style="animation-delay: 0.1s">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 bg-primary-subtle py-1">
+            <div class="card-body py-2 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-lightning-fill text-primary me-2"></i>
+                    <span class="fw-bold me-3">Quick Entry:</span>
+                    <a href="{% url 'expense-create' %}" class="btn btn-sm btn-primary me-2">
+                        <i class="bi bi-dash-circle me-1"></i> Expense
+                    </a>
+                    <a href="{% url 'income-create' %}" class="btn btn-sm btn-teal">
+                        <i class="bi bi-plus-circle me-1"></i> Income
+                    </a>
+                </div>
+                <small class="text-muted d-none d-lg-block">Instantly record your daily transactions</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Summary Cards Row -->
 <div class="row g-4 mb-4">
@@ -49,7 +69,7 @@
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-cash-coin me-2"></i>Total Income</h5>
                 <div class="d-flex align-items-center mb-0">
-                    <h2 class="display-6 fw-bold mb-0">₹{{ total_income|floatformat:0 }}</h2>
+                    <h2 class="display-6 fw-bold mb-0">{{ currency_symbol }}{{ total_income|floatformat:0 }}</h2>
                     {% if prev_month_data.income_pct is not None %}
                         <span class="badge rounded-pill {% if prev_month_data.income_pct >= 0 %}bg-success{% else %}bg-danger{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
                             <i class="bi bi-arrow-{% if prev_month_data.income_pct >= 0 %}up{% else %}down{% endif %}"></i>
@@ -77,7 +97,7 @@
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-wallet2 me-2"></i>Total Expenses</h5>
                 <div class="d-flex align-items-center mb-0">
-                    <h2 class="display-6 fw-bold mb-0">₹{{ total_expenses|floatformat:0 }}</h2>
+                    <h2 class="display-6 fw-bold mb-0">{{ currency_symbol }}{{ total_expenses|floatformat:0 }}</h2>
                     {% if prev_month_data.expense_pct is not None %}
                         <span class="badge rounded-pill {% if prev_month_data.expense_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
                             <i class="bi bi-arrow-{% if prev_month_data.expense_pct > 0 %}up{% else %}down{% endif %}"></i>
@@ -106,7 +126,7 @@
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-piggy-bank me-2"></i>Savings</h5>
                 <div class="d-flex align-items-center mb-0">
-                    <h2 class="display-6 fw-bold mb-0">₹{{ savings|floatformat:0 }}</h2>
+                    <h2 class="display-6 fw-bold mb-0">{{ currency_symbol }}{{ savings|floatformat:0 }}</h2>
                     {% if prev_month_data.savings_pct is not None %}
                         <span class="badge rounded-pill {% if prev_month_data.savings_pct >= 0 %}bg-success{% else %}bg-danger{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
                             <i class="bi bi-arrow-{% if prev_month_data.savings_pct >= 0 %}up{% else %}down{% endif %}"></i>
@@ -136,7 +156,7 @@
                 <h5 class="card-title opacity-75"><i class="bi bi-tags-fill me-2"></i>Top Category</h5>
                 {% if top_category %}
                     <h2 class="display-6 fw-bold mb-0">{{ top_category.category }}</h2>
-                    <small class="text-muted">₹{{ top_category.total|floatformat:2 }}</small>
+                    <small class="text-muted">{{ currency_symbol }}{{ top_category.total|floatformat:2 }}</small>
                 {% else %}
                     <h2 class="display-6 fw-bold mb-0">-</h2>
                     <small class="text-muted">No data</small>
@@ -302,7 +322,7 @@
                             {% for item in category_data %}
                             <tr>
                                 <td class="ps-4">{{ item.category }}</td>
-                                <td class="text-end pe-4 fw-bold">₹{{ item.total|floatformat:2 }}</td>
+                                <td class="text-end pe-4 fw-bold">{{ currency_symbol }}{{ item.total|floatformat:2 }}</td>
                             </tr>
                             {% empty %}
                             <tr>
@@ -378,7 +398,7 @@
                         const value = dataset.data[index];
                         if (value > 0 && totalIncome > 0) {
                             const pct = ((value / totalIncome) * 100).toFixed(0);
-                            const text = `₹${value.toLocaleString()} (${pct}%)`;
+                            const text = `{{ currency_symbol }}${value.toLocaleString()} (${pct}%)`;
                             const centerX = (bar.base + bar.x) / 2;
                             const centerY = bar.y;
                             if (Math.abs(bar.base - bar.x) > 40) {
@@ -427,7 +447,7 @@
                 plugins: { 
                     legend: { display: true, position: 'bottom' },
                     tooltip: {
-                        callbacks: { label: (c) => c.dataset.label + ': ₹' + c.raw.toLocaleString() }
+                        callbacks: { label: (c) => c.dataset.label + ': {{ currency_symbol }}' + c.raw.toLocaleString() }
                     }
                 },
                 scales: {
@@ -490,7 +510,7 @@
                         meta.data.forEach((arc, index) => {
                             const center = arc.getCenterPoint();
                             const value = categoryAmounts[index];
-                            const text = '₹' + value.toLocaleString();
+                            const text = '{{ currency_symbol }}' + value.toLocaleString();
                             if (arc.circumference > 0.25) {
                                 ctx.font = 'bold 10px sans-serif';
                                 ctx.textAlign = 'center';
@@ -575,7 +595,7 @@
                             const item = withLimits[index];
                             const y = bar.y;
                             const x = left + width / 2;
-                            const text = `₹${item.total.toLocaleString()} / ₹${item.limit.toLocaleString()}`;
+                            const text = `{{ currency_symbol }}${item.total.toLocaleString()} / {{ currency_symbol }}${item.limit.toLocaleString()}`;
                             ctx.font = 'bold 11px sans-serif';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
@@ -600,11 +620,11 @@
                                 title: (c) => c[0].label,
                                 label: (c) => {
                                     const item = withLimits[c.dataIndex];
-                                    if (c.dataset.label === 'Spent') return `Spent: ₹${item.total.toLocaleString()} (${item.used_percent}%)`;
+                                    if (c.dataset.label === 'Spent') return `Spent: {{ currency_symbol }}${item.total.toLocaleString()} (${item.used_percent}%)`;
                                     const remaining = Math.max(0, item.limit - item.total);
-                                    return `Remaining: ₹${remaining.toLocaleString()}`;
+                                    return `Remaining: {{ currency_symbol }}${remaining.toLocaleString()}`;
                                 },
-                                footer: (c) => `Limit: ₹${withLimits[c[0].dataIndex].limit.toLocaleString()}`
+                                footer: (c) => `Limit: {{ currency_symbol }}${withLimits[c[0].dataIndex].limit.toLocaleString()}`
                             }
                         }
                     },

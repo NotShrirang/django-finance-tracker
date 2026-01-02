@@ -252,6 +252,30 @@
             });
         })()
     </script>
+    {% if user.is_authenticated %}
+    <!-- Mobile Floating Action Button -->
+    <div class="d-md-none position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
+        <div class="dropdown">
+            <button class="btn btn-primary btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
+                    style="width: 60px; height: 60px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-plus-lg fs-2"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mb-2">
+                <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'expense-create' %}">
+                        <i class="bi bi-dash-circle text-primary me-2"></i> Add Expense
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'income-create' %}">
+                        <i class="bi bi-plus-circle text-teal me-2"></i> Add Income
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
     {% block scripts %}{% endblock %}
 </body>
 

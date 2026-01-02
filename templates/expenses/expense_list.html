@@ -74,18 +74,16 @@
                 </select>
             </div>
             <div class="col-auto">
-                <!-- Spacer for alignment -->
-                <div class="d-none d-md-block" style="height: 1.8rem;"></div>
                 <button type="submit" class="btn btn-primary btn-sm" onclick="showLoader()">
                     <i class="bi bi-search me-1"></i> Search
                 </button>
+            </div>
+            <div class="col-auto">
                 <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary btn-sm" onclick="showLoader()">
                     <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
                 </a>
             </div>
             <div class="col-auto ms-auto">
-                <!-- Spacer for alignment -->
-                <div class="d-none d-md-block" style="height: 1.8rem;"></div>
                 <div class="px-3 py-1 bg-body-tertiary border rounded shadow-sm d-flex align-items-center">
                     <span class="small text-muted me-2">Total Records:</span>
                     <span class="text-muted">

@@ -93,6 +93,7 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    height: 38px;
 }
 .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
     opacity: 0.9;
@@ -108,6 +109,7 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    height: 38px;
 }
 .btn-success:hover, .btn-success:active, .btn-success:focus {
     opacity: 0.9;
@@ -118,8 +120,12 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand {
 /* Danger Button (Red) */
 .btn-danger {
     background-color: var(--color-danger);
-    border-color: var(--color-danger);
+    border: 1px solid var(--color-danger);
     color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
 }
 .btn-danger:hover, .btn-danger:active, .btn-danger:focus {
     background-color: #bb2d3b;
@@ -144,6 +150,7 @@ a:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    height: 38px;
 }
 .btn-outline-primary:hover, .btn-outline-primary:active {
     background: var(--primary-gradient) !important;
@@ -154,6 +161,10 @@ a:hover {
 .btn-outline-secondary {
     color: var(--color-primary);
     border-color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
 }
 .btn-outline-secondary:hover, .btn-outline-secondary:active {
     background-color: var(--color-primary) !important;
@@ -222,4 +233,11 @@ a:hover {
 }
 [data-bs-theme="dark"] .nav-link:hover, [data-bs-theme="dark"] .nav-link.active {
     color: var(--color-success) !important; /* Teal for hover/active */
+}
+
+/* Small Buttons height override */
+.btn-sm {
+    height: 31px !important;
+    padding-top: 0;
+    padding-bottom: 0;
 }

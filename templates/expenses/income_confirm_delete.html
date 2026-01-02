@@ -11,7 +11,7 @@
                 <h4 class="card-title fw-bold mb-3">Delete Income?</h4>
                 <p class="text-muted mb-4">
                     Are you sure you want to delete this income record?<br>
-                    <strong>{{ object.source }} - ₹{{ object.amount }} on {{ object.date }}</strong>
+                    <strong>{{ object.source }} - {{ currency_symbol }}{{ object.amount }} on {{ object.date }}</strong>
                 </p>
                 
                 <form method="post">

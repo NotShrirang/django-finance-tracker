@@ -35,7 +35,7 @@
                     <div class="col-md-4">
                         <h4 class="h6 text-muted text-uppercase fw-bold mb-1">Total Budget Goal</h4>
                         <div class="d-flex align-items-center mb-0">
-                            <p class="h3 fw-bold mb-0">₹{{ total_spent|floatformat:2 }}</p>
+                            <p class="h3 fw-bold mb-0">{{ currency_symbol }}{{ total_spent|floatformat:2 }}</p>
                             {% if spent_mom_pct is not None %}
                                 <span class="badge rounded-pill {% if spent_mom_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.8rem;" title="vs last month">
                                     <i class="bi bi-arrow-{% if spent_mom_pct > 0 %}up{% else %}down{% endif %}"></i>
@@ -43,7 +43,7 @@
                                 </span>
                             {% endif %}
                         </div>
-                        <span class="text-muted h5">/ ₹{{ total_budget|floatformat:2 }}</span>
+                        <span class="text-muted h5">/ {{ currency_symbol }}{{ total_budget|floatformat:2 }}</span>
                     </div>
                     <div class="col-md-8">
                         <div class="progress" style="height: 12px; border-radius: 6px;">
@@ -59,9 +59,9 @@
                             <span class="small text-muted">{{ total_percentage|floatformat:1 }}% Used</span>
                             <span class="small {% if total_spent > total_budget %}text-danger fw-bold{% else %}text-muted{% endif %}">
                                 {% if total_spent > total_budget %}
-                                    Over budget by ₹{{ over_budget_amount|floatformat:2 }}
+                                    Over budget by {{ currency_symbol }}{{ over_budget_amount|floatformat:2 }}
                                 {% else %}
-                                    ₹{{ total_remaining|floatformat:2 }} remaining
+                                    {{ currency_symbol }}{{ total_remaining|floatformat:2 }} remaining
                                 {% endif %}
                             </span>
                         </div>
@@ -81,7 +81,7 @@
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
                                 <h5 class="h6 fw-bold mb-0">{{ data.category.name }}</h5>
-                                <small class="text-muted">Spent: ₹{{ data.spent|floatformat:0 }}</small>
+                                <small class="text-muted">Spent: {{ currency_symbol }}{{ data.spent|floatformat:0 }}</small>
                             </div>
                             {% if data.limit %}
                                 <div class="text-end">
@@ -103,12 +103,12 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mt-2 small">
-                                <span class="text-muted">Limit: ₹{{ data.limit|floatformat:0 }}</span>
+                                <span class="text-muted">Limit: {{ currency_symbol }}{{ data.limit|floatformat:0 }}</span>
                                 <span class="{% if data.spent > data.limit %}text-danger fw-bold{% else %}text-muted{% endif %}">
                                     {% if data.spent > data.limit %}
-                                        +₹{{ data.over_budget|floatformat:0 }}
+                                        +{{ currency_symbol }}{{ data.over_budget|floatformat:0 }}
                                     {% else %}
-                                        ₹{{ data.remaining|floatformat:0 }} left
+                                        {{ currency_symbol }}{{ data.remaining|floatformat:0 }} left
                                     {% endif %}
                                 </span>
                             </div>

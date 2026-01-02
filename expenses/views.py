@@ -12,7 +12,7 @@ from django.urls import reverse_lazy
 from django.views import generic
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.db.models import Sum, Q
-from .models import Expense, Category, Income, RecurringTransaction
+from .models import Expense, Category, Income, RecurringTransaction, UserProfile
 from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
 import pandas as pd
 import calendar
@@ -1000,3 +1000,16 @@ class AccountDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Your account has been successfully deleted. We're sorry to see you go!")
         return super().delete(request, *args, **kwargs)
+class CurrencyUpdateView(LoginRequiredMixin, UpdateView):
+    model = UserProfile
+    fields = ['currency']
+    template_name = 'expenses/currency_settings.html'
+    success_url = reverse_lazy('currency-settings')
+
+    def get_object(self, queryset=None):
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Currency preference updated successfully.')
+        return super().form_valid(form)
