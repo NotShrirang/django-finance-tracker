@@ -14,7 +14,7 @@ from django.views.generic import TemplateView, ListView, CreateView, UpdateView,
 from django.db.models import Sum, Q
 from .models import Expense, Category, Income, RecurringTransaction, UserProfile
 from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
-import pandas as pd
+import openpyxl
 import calendar
 from datetime import datetime, date, timedelta
 
@@ -334,94 +334,98 @@ def upload_view(request):
     """
     Upload view with year selection enforcement.
     """
+    import openpyxl
+    from datetime import date, datetime
+    
     if request.method == 'POST' and request.FILES.get('file'):
         excel_file = request.FILES['file']
         selected_year = int(request.POST.get('year'))
         
         try:
-            # Read all sheets
-            xls = pd.ExcelFile(excel_file)
-            for sheet_name in xls.sheet_names:
-                # Read with header=None to manually find the header row
-                df_raw = pd.read_excel(excel_file, sheet_name=sheet_name, header=None)
+            # Load workbook
+            wb = openpyxl.load_workbook(excel_file, data_only=True)
+            
+            for sheet_name in wb.sheetnames:
+                sheet = wb[sheet_name]
+                rows = list(sheet.iter_rows(values_only=True))
                 
-                # Search for the header row
+                if not rows:
+                    continue
+
+                # Search for the header row index
                 header_row_index = -1
-                for i, row in df_raw.head(10).iterrows():
-                    row_values = [str(val).strip().title() for val in row.values]
+                header_cols = []
+                
+                for i, row in enumerate(rows[:10]):
+                    if not row: continue
+                    row_values = [str(val).strip().title() if val is not None else "" for val in row]
                     if 'Date' in row_values and 'Amount' in row_values and 'Description' in row_values:
                         header_row_index = i
+                        header_cols = row_values
                         break
                 
                 if header_row_index == -1:
                     print(f"Skipping sheet {sheet_name}: Could not find header row.")
                     continue
 
-                # Reload dataframe with correct header
-                df = pd.read_excel(excel_file, sheet_name=sheet_name, header=header_row_index)
-                
-                # Normalize columns
-                df.columns = [str(col).strip().title() for col in df.columns]
-                
+                # Map column indices
+                col_map = {col: idx for idx, col in enumerate(header_cols) if col}
                 required_columns = ['Date', 'Amount', 'Description', 'Category']
-                if not all(col in df.columns for col in required_columns):
+                
+                if not all(col in col_map for col in required_columns):
                     print(f"Skipping sheet {sheet_name}: Missing required columns.")
                     continue
 
-                for index, row in df.iterrows():
+                # Process data rows
+                for row_data in rows[header_row_index + 1:]:
+                    if not any(row_data): continue # Skip empty rows
+                    
                     # Parse date
-                    date_val = row['Date']
-                    if pd.isna(date_val):
+                    date_val = row_data[col_map['Date']]
+                    if date_val is None:
                         continue
                         
-                    # Handle different date formats or datetime objects
                     date_obj = None
                     if isinstance(date_val, str):
                         formats = ['%d %b %Y', '%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%m/%d/%Y', '%d %B %Y', '%d %b', '%d-%b', '%d %B']
                         for fmt in formats:
                             try:
-                                parsed_date = datetime.strptime(date_val, fmt).date()
-                                # Force year
+                                parsed_date = datetime.strptime(date_val.strip(), fmt).date()
                                 date_obj = parsed_date.replace(year=selected_year)
                                 break
                             except ValueError:
                                 continue
                         if not date_obj:
-                            print(f"Skipping row {index}: Could not parse date '{date_val}'")
                             continue
-                    else:
-                        date_obj = date_val.date() if hasattr(date_val, 'date') else date_val
-                        # Force year
+                    elif isinstance(date_val, (datetime, date)):
+                        date_obj = date_val if isinstance(date_val, date) else date_val.date()
                         try:
                             date_obj = date_obj.replace(year=selected_year)
                         except ValueError:
-                            # Handle Feb 29 on non-leap year target
-                             # Fallback to Feb 28 or Mar 1
-                             date_obj = date_obj.replace(day=28, year=selected_year)
+                            date_obj = date_obj.replace(day=28, year=selected_year)
+                    else:
+                        continue # Unsupported date type
 
                     # Get other fields
-                    amount = row['Amount']
-                    description = row['Description']
-                    category = row['Category']
+                    amount = row_data[col_map['Amount']]
+                    description = row_data[col_map['Description']]
+                    category = row_data[col_map['Category']] if 'Category' in col_map else None
                     
-                    if pd.isna(amount) or pd.isna(description):
+                    if amount is None or description is None:
                         continue
 
-                    # Auto-create category if it doesn't exist
+                    category_obj = None
                     if category:
-                        # Ensure category is a string
                         category_name = str(category).strip()
                         if category_name:
-                            Category.objects.get_or_create(user=request.user, name=category_name)
-                            category = category_name # Use standardized name
+                            category_obj, _ = Category.objects.get_or_create(user=request.user, name=category_name)
 
-                    # Upsert (Get or Create to avoid duplicates)
                     Expense.objects.get_or_create(
                         user=request.user,
                         date=date_obj,
-                        amount=amount,
-                        description=description,
-                        category=category
+                        amount=float(amount) if not isinstance(amount, float) else amount,
+                        description=str(description),
+                        category=category_obj.name if category_obj else "Others"
                     )
             return redirect('home')
         except Exception as e:
