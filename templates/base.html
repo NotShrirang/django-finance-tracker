@@ -31,12 +31,17 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}?v=1.8">
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#212529">
+    <meta name="theme-color" content="#023047">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Finance Tracker">
+    <link rel="apple-touch-icon" href="{% static 'img/pwa-icon-512.png' %}">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register("{% static 'service-worker.js' %}")
+          navigator.serviceWorker.register("{% static 'sw.js' %}")
             .then(registration => {
               console.log('ServiceWorker registration successful');
             })
