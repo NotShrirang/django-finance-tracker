@@ -35,12 +35,12 @@
 
                     <div class="position-relative my-4">
                         <hr class="text-muted">
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">OR</span>
+                        <span class="position-absolute top-50 start-50 translate-middle px-3 text-muted small" style="background: var(--bs-card-bg, #fff);">OR</span>
                     </div>
 
                     {% load socialaccount %}
-                    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark w-100 btn-lg mb-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-google me-2"></i> Continue with Google
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-secondary w-100 btn-lg mb-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-google me-2 text-primary"></i> Continue with Google
                     </a>
 
                     <p class="text-center text-muted mb-0">

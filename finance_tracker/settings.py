@@ -145,7 +145,9 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = 2
+import os
+
+SITE_ID = int(os.environ.get('SITE_ID', 1))
 
 # Account Settings
 ACCOUNT_EMAIL_VERIFICATION = 'none'

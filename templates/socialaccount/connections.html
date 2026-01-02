@@ -1,0 +1,47 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block account_content %}
+<div class="text-center mb-4">
+    <h2 class="fw-bold mb-2">{% trans "Account Connections" %}</h2>
+    <p class="text-muted small">{% trans "Manage your linked social accounts" %}</p>
+</div>
+
+{% if form.accounts %}
+    <p class="small text-muted mb-3">{% trans "You can sign in to your account using any of the following third party accounts:" %}</p>
+    <form method="post" action="{% url 'socialaccount_connections' %}">
+        {% csrf_token %}
+        <div class="list-group mb-4 shadow-sm">
+            {% for base_account in form.accounts %}
+                {% with auth_account=base_account.get_auth_account %}
+                    <label class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div class="d-flex align-items-center">
+                            <input type="radio" name="account" value="{{ base_account.pk }}" class="form-check-input me-3">
+                            <div>
+                                <span class="fw-bold">{{ base_account.get_provider.name }}</span>
+                                <div class="text-muted small">{{ auth_account.uid }}</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">Connected</span>
+                    </label>
+                {% endwith %}
+            {% endfor %}
+        </div>
+        
+        <div class="d-grid">
+            <button type="submit" class="btn btn-danger py-2 fw-bold">{% trans "Remove Connection" %}</button>
+        </div>
+    </form>
+{% else %}
+    <div class="alert alert-info border-0 small">
+        {% trans "You currently have no social accounts connected." %}
+    </div>
+{% endif %}
+
+<div class="mt-4 pt-3 border-top text-center">
+    <h5 class="fw-bold small mb-3">{% trans "Add a 3rd Party Account" %}</h5>
+    <ul class="list-unstyled d-flex justify-content-center gap-3">
+        {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+    </ul>
+</div>
+{% endblock %}

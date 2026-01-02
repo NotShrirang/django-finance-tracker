@@ -1,0 +1,83 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load socialaccount %}
+
+{% block account_content %}
+<div class="text-center mb-4">
+    <h2 class="fw-bold mb-2">{% trans "Create Account" %}</h2>
+    <p class="text-muted small">Start tracking your expenses today</p>
+</div>
+
+<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger mb-4">
+        {% for error in form.non_field_errors %}
+        <div class="small">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% for field in form %}
+    <div class="mb-3">
+        <label class="form-label text-muted small fw-bold">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <div class="form-text small opacity-75">{{ field.help_text|safe }}</div>
+        {% endif %}
+        {% if field.errors %}
+        <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <div class="d-grid mt-4">
+        <button class="btn btn-primary btn-lg py-3 fw-bold" type="submit">{% trans "Sign Up" %}</button>
+    </div>
+
+    <div class="position-relative my-4 text-center">
+        <hr class="text-muted">
+        <span class="position-absolute top-50 start-50 translate-middle divider-text text-muted small">OR</span>
+    </div>
+
+    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-secondary w-100 btn-lg py-2 d-flex align-items-center justify-content-center mb-4">
+        <i class="bi bi-google me-2 text-primary"></i> Join with Google
+    </a>
+
+    <div class="text-center">
+        <p class="text-muted small mb-0">
+            {% blocktrans %}Already have an account? <a href="{{ login_url }}" class="text-decoration-none fw-bold">Sign In</a>{% endblocktrans %}
+        </p>
+    </div>
+</form>
+
+<style>
+    /* Ensure Allauth rendered inputs look premium */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--bs-body-color);
+        background-color: var(--bs-body-bg);
+        background-clip: padding-box;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 0.5rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    input:focus {
+        border-color: var(--color-primary);
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+</style>
+{% endblock %}

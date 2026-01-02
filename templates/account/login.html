@@ -1,0 +1,62 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load socialaccount %}
+
+{% block account_content %}
+<div class="text-center mb-4">
+    <h2 class="fw-bold mb-2">{% trans "Welcome Back" %}</h2>
+    <p class="text-muted small">Sign in to manage your finances</p>
+</div>
+
+<form class="login" method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger mb-4">
+        {% for error in form.non_field_errors %}
+        <div class="small">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% for field in form %}
+    <div class="mb-3">
+        <label class="form-label text-muted small fw-bold">{{ field.label }}</label>
+        <input type="{{ field.field.widget.input_type }}" 
+               name="{{ field.name }}"
+               class="form-control form-control-lg {% if field.errors %}is-invalid{% endif %}"
+               {% if field.value %}value="{{ field.value }}"{% endif %}
+               {% if field.field.required %}required{% endif %}>
+        {% if field.errors %}
+        <div class="invalid-feedback">
+            {{ field.errors.0 }}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <div class="d-grid mt-4">
+        <button class="primaryAction btn btn-primary btn-lg py-3 fw-bold" type="submit">{% trans "Sign In" %}</button>
+    </div>
+
+    <div class="position-relative my-4 text-center">
+        <hr class="text-muted">
+        <span class="position-absolute top-50 start-50 translate-middle divider-text text-muted small">OR</span>
+    </div>
+
+    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-secondary w-100 btn-lg py-2 d-flex align-items-center justify-content-center mb-4">
+        <i class="bi bi-google me-2 text-primary"></i> Continue with Google
+    </a>
+
+    <div class="text-center">
+        <p class="text-muted small mb-0">
+            {% blocktrans %}Don't have an account? <a href="{{ signup_url }}" class="text-decoration-none fw-bold">Sign Up</a>{% endblocktrans %}
+        </p>
+        <a class="button secondaryAction text-decoration-none small text-muted mt-2 d-inline-block" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+    </div>
+</form>
+{% endblock %}

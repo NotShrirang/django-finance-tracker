@@ -98,12 +98,6 @@
                         </a>
                     </li>
                     
-                    <!-- Simple Theme Toggle -->
-                    <li class="nav-item ms-lg-2">
-                        <button class="btn btn-link nav-link p-1" id="theme-toggle" title="Toggle theme">
-                            <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
-                        </button>
-                    </li>
 
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="post" class="d-inline">
@@ -125,6 +119,13 @@
                         </a>
                     </li>
                     {% endif %}
+
+                    <!-- Simple Theme Toggle -->
+                    <li class="nav-item ms-lg-2">
+                        <button class="btn btn-link nav-link p-1" id="theme-toggle" title="Toggle theme">
+                            <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>

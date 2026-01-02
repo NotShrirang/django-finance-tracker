@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5 col-xl-4">
+        <div class="card shadow-lg border-0 fade-in">
+            <div class="card-body p-4 p-md-5">
+                {% block account_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Global Account Page Styles */
+    .card {
+        background-color: var(--bs-card-bg);
+    }
+    
+    .divider-text {
+        background-color: var(--bs-card-bg, #fff);
+        padding: 0 1rem;
+    }
+
+    /* Google Button Enhancement */
+    .btn-outline-secondary {
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: rgba(0,0,0,0.05);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .btn-outline-secondary:hover {
+        background-color: rgba(255,255,255,0.05);
+    }
+
+    .bi-google {
+        filter: drop-shadow(0 0 1px rgba(0,0,0,0.1));
+    }
+</style>
+{% endblock %}
