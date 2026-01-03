@@ -291,6 +291,20 @@ def home_view(request):
                     prev_month_data[f'{key}_abs'] = abs(val)
         except (ValueError, IndexError):
             pass
+
+    # Prepare display labels for the template
+    display_year = None
+    display_month = None
+    
+    if len(selected_years) == 1:
+        display_year = selected_years[0]
+        
+    if len(selected_months) == 1:
+        try:
+            m_idx = int(selected_months[0])
+            display_month = calendar.month_name[m_idx]
+        except (ValueError, IndexError):
+            pass
     
     context = {
         'total_income': total_income,
@@ -309,6 +323,8 @@ def home_view(request):
         'all_categories': all_categories,
         'selected_years': selected_years,
         'selected_months': selected_months,
+        'selected_year': display_year,    # NEW: For template display labels
+        'selected_month': display_month,  # NEW: For template display labels
         'selected_categories': selected_categories,
         'months_list': [(i, calendar.month_name[i]) for i in range(1, 13)],
         'total_expenses': total_expenses,
