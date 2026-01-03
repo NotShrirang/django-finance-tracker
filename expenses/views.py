@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.db import IntegrityError
 import csv
 from django.forms import modelformset_factory
 from django.contrib.auth.models import User
@@ -505,7 +506,9 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
         user_expenses = Expense.objects.filter(user=self.request.user)
         years_dates = user_expenses.dates('date', 'year', order='DESC')
         years = sorted(list(set([d.year for d in years_dates] + [datetime.now().year])), reverse=True)
-        categories = user_expenses.values_list('category', flat=True).distinct().order_by('category')
+        # Python-side deduplication to handle whitespace variants (e.g. "Goa" vs "Goa ")
+        raw_categories = user_expenses.values_list('category', flat=True)
+        categories = sorted(list(set([c.strip() for c in raw_categories if c and c.strip()])), key=str.lower)
         
         context['years'] = years
         context['categories'] = categories
@@ -568,11 +571,15 @@ class ExpenseCreateView(LoginRequiredMixin, generic.TemplateView):
         ExpenseFormSet = modelformset_factory(Expense, form=ExpenseForm, extra=1, can_delete=True)
         formset = ExpenseFormSet(request.POST, form_kwargs={'user': request.user})
         if formset.is_valid():
-            instances = formset.save(commit=False)
-            for instance in instances:
-                instance.user = request.user
-                instance.save()
-            return redirect('expense-list')
+            try:
+                instances = formset.save(commit=False)
+                for instance in instances:
+                    instance.user = request.user
+                    instance.save()
+                return redirect('expense-list')
+            except IntegrityError:
+                messages.error(request, "This expense entry already exists.")
+                return render(request, self.template_name, {'formset': formset})
         return render(request, self.template_name, {'formset': formset})
 
 class ExpenseUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -585,6 +592,13 @@ class ExpenseUpdateView(LoginRequiredMixin, generic.UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            messages.error(self.request, "This expense entry already exists.")
+            return self.form_invalid(form)
 
     def get_queryset(self):
         # Ensure user can only edit their own expenses
@@ -625,8 +639,12 @@ class CategoryCreateView(LoginRequiredMixin, generic.CreateView):
     success_url = reverse_lazy('category-list')
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+        try:
+            form.instance.user = self.request.user
+            return super().form_valid(form)
+        except IntegrityError:
+            messages.error(self.request, "This category already exists.")
+            return self.form_invalid(form)
 
 class CategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Category
@@ -638,15 +656,19 @@ class CategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
         return Category.objects.filter(user=self.request.user)
     
     def form_valid(self, form):
-        # Store old name to update related expenses
-        old_name = self.get_object().name
-        response = super().form_valid(form)
-        new_name = self.object.name
-        
-        if old_name != new_name:
-            Expense.objects.filter(user=self.request.user, category=old_name).update(category=new_name)
+        try:
+            # Store old name to update related expenses
+            old_name = self.get_object().name
+            response = super().form_valid(form)
+            new_name = self.object.name
             
-        return response
+            if old_name != new_name:
+                Expense.objects.filter(user=self.request.user, category=old_name).update(category=new_name)
+                
+            return response
+        except IntegrityError:
+            messages.error(self.request, "This category already exists.")
+            return self.form_invalid(form)
 
 class CategoryDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Category
@@ -710,6 +732,8 @@ def export_expenses(request):
 # Income Views
 # --------------------
 
+from django.utils import timezone
+
 class IncomeListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
     model = Income
     template_name = 'expenses/income_list.html'
@@ -719,16 +743,38 @@ class IncomeListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
     def get_queryset(self):
         queryset = Income.objects.filter(user=self.request.user).order_by('-date')
         
+        # Default dates (Current Year)
+        today = timezone.localdate()
+        default_start = today.replace(month=1, day=1)
+        default_end = today.replace(month=12, day=31)
+
         # Date Filter
         date_from = self.request.GET.get('date_from')
         date_to = self.request.GET.get('date_to')
-        if date_from:
-            queryset = queryset.filter(date__gte=date_from)
-        if date_to:
-            queryset = queryset.filter(date__lte=date_to)
-            
-        # Source Filter
         source = self.request.GET.get('source')
+
+        # Check if we have ANY filter params. If not, apply default dates.
+        if not date_from and not date_to and not source:
+             self.date_from = default_start.isoformat()
+             self.date_to = default_end.isoformat()
+             queryset = queryset.filter(date__gte=default_start, date__lte=default_end)
+        else:
+            # We have some filters (or user explicitly cleared them? - tricky part about "reset")
+            # If user wants to "clear" filters, they usually submit empty strings.
+            # But the requirement says "default start date...". Usually implies initial load.
+            if date_from:
+                queryset = queryset.filter(date__gte=date_from)
+                self.date_from = date_from
+            else:
+                self.date_from = ''
+            
+            if date_to:
+                queryset = queryset.filter(date__lte=date_to)
+                self.date_to = date_to
+            else:
+                self.date_to = ''
+
+        # Source Filter
         if source:
             queryset = queryset.filter(source__icontains=source)
             
@@ -736,9 +782,15 @@ class IncomeListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Calculate stats for the filtered queryset
+        filtered_queryset = self.object_list
+        context['filtered_count'] = filtered_queryset.count()
+        context['filtered_amount'] = filtered_queryset.aggregate(Sum('amount'))['amount__sum'] or 0
+        
         context['filter_form'] = {
-            'date_from': self.request.GET.get('date_from', ''),
-            'date_to': self.request.GET.get('date_to', ''),
+            'date_from': getattr(self, 'date_from', ''),
+            'date_to': getattr(self, 'date_to', ''),
             'source': self.request.GET.get('source', ''),
         }
         return context
@@ -755,8 +807,12 @@ class IncomeCreateView(LoginRequiredMixin, generic.CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+        try:
+            form.instance.user = self.request.user
+            return super().form_valid(form)
+        except IntegrityError:
+            messages.error(self.request, "This income entry already exists.")
+            return self.form_invalid(form)
 
 class IncomeUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Income
@@ -771,6 +827,13 @@ class IncomeUpdateView(LoginRequiredMixin, generic.UpdateView):
 
     def get_queryset(self):
         return Income.objects.filter(user=self.request.user)
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            messages.error(self.request, "This income entry already exists.")
+            return self.form_invalid(form)
 
 class IncomeDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Income
