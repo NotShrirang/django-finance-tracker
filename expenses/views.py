@@ -85,13 +85,17 @@ def home_view(request):
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
     
     # Filter Logic
-    # Filter Logic
-    selected_year = request.GET.get('year')
-    selected_month = request.GET.get('month')
-    selected_category = request.GET.get('category')
+    selected_years = request.GET.getlist('year')
+    selected_months = request.GET.getlist('month')
+    selected_categories = request.GET.getlist('category')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-    
+
+    # Remove empty strings from lists
+    selected_years = [y for y in selected_years if y]
+    selected_months = [m for m in selected_months if m]
+    selected_categories = [c for c in selected_categories if c]
+
     # Date Range takes precedence
     if start_date or end_date:
         if start_date:
@@ -99,48 +103,29 @@ def home_view(request):
         if end_date:
             expenses = expenses.filter(date__lte=end_date)
         
-        # Reset year/month selection for UI clarity since we are in custom range mode
-        selected_year = None
-        selected_month = None
+        # Reset lists for UI clarity since we are in range mode
+        selected_years = []
+        selected_months = []
         
         trend_title = "Expenses Trend (Custom Range)"
     else:
-        # Default to current month/year ONLY on initial land (None)
-        # If user explicitly chooses "" (All Years), it will be an empty string.
-        if selected_year is None:
-            selected_year = datetime.now().year
-        elif selected_year == "":
-            selected_year = None
-        else:
-            try:
-                selected_year = int(selected_year)
-            except ValueError:
-                selected_year = None
-
-        if selected_month is None:
-            selected_month = datetime.now().month
-        elif selected_month == "":
-            selected_month = None
-        else:
-            try:
-                selected_month = int(selected_month)
-            except ValueError:
-                selected_month = None
+        # Default to current month/year ONLY on initial land (no params)
+        if not request.GET and not (selected_years or selected_months):
+            selected_years = [str(datetime.now().year)]
+            selected_months = [str(datetime.now().month)]
         
-        if selected_year:
-            expenses = expenses.filter(date__year=selected_year)
-        if selected_month:
-            expenses = expenses.filter(date__month=selected_month)
+        if selected_years:
+            expenses = expenses.filter(date__year__in=selected_years)
+        if selected_months:
+            expenses = expenses.filter(date__month__in=selected_months)
             
-        if selected_month and selected_year:
-            trend_title = f"Daily Expenses for {selected_month}/{selected_year}"
+        if len(selected_months) == 1 and len(selected_years) == 1:
+            trend_title = f"Daily Expenses for {selected_months[0]}/{selected_years[0]}"
         else:
             trend_title = "Monthly Expenses Trend"
 
-    if selected_category:
-        expenses = expenses.filter(category=selected_category)
-    if selected_category:
-        expenses = expenses.filter(category=selected_category)
+    if selected_categories:
+        expenses = expenses.filter(category__in=selected_categories)
         
     # Income Logic (Mirroring Expense Filters)
     incomes = Income.objects.filter(user=request.user)
@@ -150,10 +135,10 @@ def home_view(request):
         if end_date:
             incomes = incomes.filter(date__lte=end_date)
     else:
-        if selected_year:
-            incomes = incomes.filter(date__year=selected_year)
-        if selected_month:
-            incomes = incomes.filter(date__month=selected_month)
+        if selected_years:
+            incomes = incomes.filter(date__year__in=selected_years)
+        if selected_months:
+            incomes = incomes.filter(date__month__in=selected_months)
     
     total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or 0
     all_dates = Expense.objects.filter(user=request.user).dates('date', 'year', order='DESC')
@@ -214,7 +199,7 @@ def home_view(request):
         # Let's stick to: if explicit month selected -> daily. If range -> daily (usually granular).
         trend_qs = expenses.annotate(period=TruncDay('date'))
         date_format = '%d %b'
-    elif selected_month and selected_year:
+    elif len(selected_months) == 1 and len(selected_years) == 1:
         # Daily view
         trend_qs = expenses.annotate(period=TruncDay('date'))
         date_format = '%d %b'
@@ -270,36 +255,42 @@ def home_view(request):
     
     savings = total_income - total_expenses
 
-    # Calculate MoM Changes if a specific month is selected
+    # Calculate MoM Changes ONLY if exactly one year and one month are selected
     prev_month_data = None
-    if selected_month and selected_year:
-        # Calculate previous month and year
-        if selected_month == 1:
-            prev_month = 12
-            prev_year = selected_year - 1
-        else:
-            prev_month = selected_month - 1
-            prev_year = selected_year
+    if len(selected_years) == 1 and len(selected_months) == 1:
+        try:
+            sel_year = int(selected_years[0])
+            sel_month = int(selected_months[0])
+            
+            # Calculate previous month and year
+            if sel_month == 1:
+                prev_month = 12
+                prev_year = sel_year - 1
+            else:
+                prev_month = sel_month - 1
+                prev_year = sel_year
 
-        prev_expenses = Expense.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).aggregate(Sum('amount'))['amount__sum'] or 0
-        prev_income = Income.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).aggregate(Sum('amount'))['amount__sum'] or 0
-        prev_savings = prev_income - prev_expenses
+            prev_expenses = Expense.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).aggregate(Sum('amount'))['amount__sum'] or 0
+            prev_income = Income.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).aggregate(Sum('amount'))['amount__sum'] or 0
+            prev_savings = prev_income - prev_expenses
 
-        def calc_pct(current, previous):
-            if previous == 0:
-                return None
-            return ((current - previous) / previous) * 100
+            def calc_pct(current, previous):
+                if previous == 0:
+                    return None
+                return ((current - previous) / previous) * 100
 
-        prev_month_data = {
-            'income_pct': calc_pct(total_income, prev_income),
-            'expense_pct': calc_pct(total_expenses, prev_expenses),
-            'savings_pct': calc_pct(savings, prev_savings),
-        }
-        # Add absolute values for template display
-        for key in list(prev_month_data.keys()):
-            val = prev_month_data[key]
-            if val is not None:
-                prev_month_data[f'{key}_abs'] = abs(val)
+            prev_month_data = {
+                'income_pct': calc_pct(total_income, prev_income),
+                'expense_pct': calc_pct(total_expenses, prev_expenses),
+                'savings_pct': calc_pct(savings, prev_savings),
+            }
+            # Add absolute values for template display
+            for key in list(prev_month_data.keys()):
+                val = prev_month_data[key]
+                if val is not None:
+                    prev_month_data[f'{key}_abs'] = abs(val)
+        except (ValueError, IndexError):
+            pass
     
     context = {
         'total_income': total_income,
@@ -316,9 +307,9 @@ def home_view(request):
         'top_amounts': top_amounts,
         'years': years,
         'all_categories': all_categories,
-        'selected_year': int(selected_year) if selected_year else None,
-        'selected_month': int(selected_month) if selected_month else None,
-        'selected_category': selected_category,
+        'selected_years': selected_years,
+        'selected_months': selected_months,
+        'selected_categories': selected_categories,
         'months_list': [(i, calendar.month_name[i]) for i in range(1, 13)],
         'total_expenses': total_expenses,
         'transaction_count': transaction_count,
@@ -450,12 +441,17 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
         queryset = Expense.objects.filter(user=self.request.user).order_by('-date')
         
         # Filtering
-        year = self.request.GET.get('year')
-        month = self.request.GET.get('month')
-        category = self.request.GET.get('category')
+        selected_years = self.request.GET.getlist('year')
+        selected_months = self.request.GET.getlist('month')
+        selected_categories = self.request.GET.getlist('category')
         search_query = self.request.GET.get('search')
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
+
+        # Remove empty strings from lists
+        selected_years = [y for y in selected_years if y]
+        selected_months = [m for m in selected_months if m]
+        selected_categories = [c for c in selected_categories if c]
         
         # Date Range Logic (Precedence over Year/Month)
         if start_date or end_date:
@@ -464,18 +460,18 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
             if end_date:
                 queryset = queryset.filter(date__lte=end_date)
         else:
-            # Standard Year/Month Logic
-            # Default to current year ONLY if no param present (None)
-            if year is None:
-                year = datetime.now().year
+            # Default to current year ONLY on initial land (no params)
+            if not self.request.GET and not (selected_years or selected_months):
+                selected_years = [str(datetime.now().year)]
             
-            if year: # If not "All Years"
-                queryset = queryset.filter(date__year=year)
+            if selected_years:
+                queryset = queryset.filter(date__year__in=selected_years)
             
-            if month: # If not "All Months"
-                queryset = queryset.filter(date__month=month)
-        if category:
-            queryset = queryset.filter(category=category)
+            if selected_months:
+                queryset = queryset.filter(date__month__in=selected_months)
+
+        if selected_categories:
+            queryset = queryset.filter(category__in=selected_categories)
         if search_query:
             queryset = queryset.filter(description__icontains=search_query)
             
@@ -503,30 +499,26 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
         context['end_date'] = end_date
         
         if start_date or end_date:
-            context['selected_year'] = None
-            context['selected_month'] = None
+            context['selected_years'] = []
+            context['selected_months'] = []
+            context['selected_categories'] = []
         else:
-            year_param = self.request.GET.get('year')
-            if year_param is None:
-                context['selected_year'] = datetime.now().year
-            elif year_param == "":
-                context['selected_year'] = None
-            else:
-                try:
-                    context['selected_year'] = int(year_param)
-                except ValueError:
-                    context['selected_year'] = None
+            selected_years = self.request.GET.getlist('year')
+            selected_months = self.request.GET.getlist('month')
+            selected_categories = self.request.GET.getlist('category')
+            
+            # Remove empty strings
+            selected_years = [y for y in selected_years if y]
+            selected_months = [m for m in selected_months if m]
+            selected_categories = [c for c in selected_categories if c]
 
-            month_param = self.request.GET.get('month')
-            if month_param is None:
-                context['selected_month'] = datetime.now().month
-            elif month_param == "":
-                context['selected_month'] = None
-            else:
-                try:
-                    context['selected_month'] = int(month_param)
-                except ValueError:
-                    context['selected_month'] = None
+            if not self.request.GET and not (selected_years or selected_months):
+                selected_years = [str(datetime.now().year)]
+                selected_months = [str(datetime.now().month)]
+            
+            context['selected_years'] = selected_years
+            context['selected_months'] = selected_months
+            context['selected_categories'] = selected_categories
             
         return context
 
@@ -639,13 +631,18 @@ def export_expenses(request):
     """
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
 
-    # Filter Logic (Duplicate of ExpenseListView logic)
-    year = request.GET.get('year')
-    month = request.GET.get('month')
-    category = request.GET.get('category')
+    # Filter Logic
+    selected_years = request.GET.getlist('year')
+    selected_months = request.GET.getlist('month')
+    selected_categories = request.GET.getlist('category')
     search_query = request.GET.get('search')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+
+    # Remove empty strings
+    selected_years = [y for y in selected_years if y]
+    selected_months = [m for m in selected_months if m]
+    selected_categories = [c for c in selected_categories if c]
 
     if start_date or end_date:
         if start_date:
@@ -653,16 +650,16 @@ def export_expenses(request):
         if end_date:
             expenses = expenses.filter(date__lte=end_date)
     else:
-        if year is None:
-            year = datetime.now().year
-            expenses = expenses.filter(date__year=year)
-        elif year:
-            expenses = expenses.filter(date__year=year)
-        if month:
-            expenses = expenses.filter(date__month=month)
+        if not request.GET and not (selected_years or selected_months):
+            selected_years = [str(datetime.now().year)]
 
-    if category:
-        expenses = expenses.filter(category=category)
+        if selected_years:
+            expenses = expenses.filter(date__year__in=selected_years)
+        if selected_months:
+            expenses = expenses.filter(date__month__in=selected_months)
+
+    if selected_categories:
+        expenses = expenses.filter(category__in=selected_categories)
     if search_query:
         expenses = expenses.filter(description__icontains=search_query)
 

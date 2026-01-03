@@ -30,6 +30,117 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}?v=1.8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/css/bootstrap-multiselect.min.css">
+    <style>
+        /* Bootstrap Multiselect Premium Customization */
+        
+        /* The main button that looks like a select input */
+        .multiselect.dropdown-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            height: 38px; /* Standard input height */
+            background-color: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            color: var(--bs-body-color);
+            border-radius: 6px;
+            font-weight: 400;
+            text-align: left;
+            overflow: hidden;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.875rem; /* Match btn-sm */
+        }
+
+        .multiselect.dropdown-toggle:focus, 
+        .multiselect.dropdown-toggle:active, 
+        .btn-group.show .multiselect.dropdown-toggle {
+            border-color: #00f2fe !important;
+            box-shadow: 0 0 0 0.25rem rgba(0, 242, 254, 0.15) !important;
+            outline: 0;
+            color: var(--bs-body-color);
+            background-color: var(--bs-body-bg);
+        }
+
+        /* Adjust the caret position */
+        .multiselect.dropdown-toggle::after {
+            margin-left: auto;
+        }
+
+        /* Dropdown Menu styling */
+        .multiselect-container.dropdown-menu {
+            border-radius: 8px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+            background-color: var(--bs-body-bg) !important;
+            border: 1px solid var(--bs-border-color) !important;
+            padding: 0.5rem 0;
+            min-width: 100%;
+            z-index: 1050;
+        }
+
+        /* Dropdown Items */
+        .multiselect-container > li > a {
+            padding: 8px 16px;
+            color: var(--bs-body-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .multiselect-container > li > a:hover {
+            background-color: rgba(0, 242, 254, 0.05);
+            color: var(--bs-body-color);
+        }
+
+        .multiselect-container > li.active > a {
+            background-color: rgba(0, 242, 254, 0.1);
+            color: var(--bs-body-color);
+        }
+
+        /* Custom Checkboxes inside the dropdown */
+        .multiselect-container input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+            margin-right: 10px;
+            cursor: pointer;
+            position: relative;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            background-color: var(--bs-body-bg);
+        }
+
+        .multiselect-container input[type="checkbox"]:checked {
+            background: var(--primary-gradient);
+            border-color: transparent;
+        }
+
+        .multiselect-container input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Fix label styling */
+        .multiselect-container label.checkbox {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 0;
+            cursor: pointer;
+        }
+        
+    </style>
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#023047">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -277,6 +388,35 @@
     </div>
     {% endif %}
 
+    <!-- jQuery (Required for Bootstrap Multiselect) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/js/bootstrap-multiselect.min.js"></script>
+
+    <script>
+        // Global Bootstrap Multiselect Initialization
+        // Usage: Add class 'django-multi-select' to any <select multiple>
+        const initGlobalMultiselects = () => {
+            $('.django-multi-select').each(function() {
+                const placeholder = $(this).attr('placeholder') || 'Select...';
+                $(this).multiselect({
+                    buttonWidth: '100%',
+                    nonSelectedText: placeholder,
+                    nSelectedText: ' - Selected',
+                    allSelectedText: 'All Selected',
+                    numberDisplayed: 1,
+                    includeSelectAllOption: true,
+                    buttonClass: 'btn btn-outline-secondary form-select form-select-sm text-start d-flex align-items-center justify-content-between',
+                    templates: {
+                        button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>'
+                    }
+                });
+            });
+        };
+
+        $(document).ready(function() {
+            initGlobalMultiselects();
+        });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 

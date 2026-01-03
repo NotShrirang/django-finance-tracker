@@ -20,11 +20,11 @@
     </div>
     
     <!-- Filter Form -->
-    <form method="get" class="mb-4 bg-body-tertiary p-3 rounded shadow-sm" id="filter-form">
-        <div class="row g-3 align-items-end">
+    <form method="get" class="mb-4 bg-body-tertiary p-3 rounded shadow-sm" id="filter-form" style="position: relative; z-index: 1060;">
+        <div class="row g-2 align-items-end flex-nowrap">
             <div class="col-auto">
                 <label for="search" class="form-label small text-muted">Search</label>
-                <input type="text" name="search" id="search" class="form-control form-control-sm" placeholder="Search..." value="{{ request.GET.search|default:'' }}">
+                <input type="text" name="search" id="search" class="form-control form-control-sm" placeholder="Search..." value="{{ request.GET.search|default:'' }}" style="width: 140px;">
             </div>
             <div class="col-auto">
                 <label for="start_date" class="form-label small text-muted d-none d-md-block">From</label>
@@ -40,34 +40,31 @@
                     <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|default:'' }}" onchange="showLoaderAndSubmit()">
                 </div>
             </div>
-            <div class="col-auto">
-                <label for="year" class="form-label small text-muted">Year</label>
-                <select name="year" id="year" class="form-select form-select-sm" onchange="showLoaderAndSubmit()">
-                    <option value="">All Years</option>
+            <div class="col-auto" style="width: 120px;">
+                <label for="year-select" class="form-label small text-muted">Year</label>
+                <select name="year" id="year-select" class="form-control django-multi-select" multiple placeholder="Years...">
                     {% for dt in years %}
-                        <option value="{{ dt }}" {% if selected_year == dt %}selected{% endif %}>
+                        <option value="{{ dt }}" {% if dt|stringformat:"s" in selected_years %}selected{% endif %}>
                             {{ dt }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-auto">
-                <label for="month" class="form-label small text-muted">Month</label>
-                <select name="month" id="month" class="form-select form-select-sm" onchange="showLoaderAndSubmit()">
-                    <option value="">All Months</option>
+            <div class="col-auto" style="width: 150px;">
+                <label for="month-select" class="form-label small text-muted">Month</label>
+                <select name="month" id="month-select" class="form-control django-multi-select" multiple placeholder="Months...">
                     {% for num, name in months_list %}
-                        <option value="{{ num }}" {% if selected_month == num %}selected{% endif %}>
+                        <option value="{{ num }}" {% if num|stringformat:"s" in selected_months %}selected{% endif %}>
                             {{ name }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-auto">
-                <label for="category" class="form-label small text-muted">Category</label>
-                <select name="category" id="category" class="form-select form-select-sm" onchange="showLoaderAndSubmit()">
-                    <option value="">All Categories</option>
+            <div class="col-auto" style="width: 170px;">
+                <label for="category-select" class="form-label small text-muted">Category</label>
+                <select name="category" id="category-select" class="form-control django-multi-select" multiple placeholder="Categories...">
                     {% for cat in categories %}
-                        <option value="{{ cat }}" {% if request.GET.category == cat %}selected{% endif %}>
+                        <option value="{{ cat }}" {% if cat in selected_categories %}selected{% endif %}>
                             {{ cat }}
                         </option>
                     {% endfor %}
@@ -179,14 +176,13 @@
         </div>
     </div>
 
-    <!-- Pagination -->
     {% if is_paginated %}
     <div class="card-footer bg-transparent py-3">
         <nav>
             <ul class="pagination justify-content-center mb-0">
                 {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">Previous</a>
                 </li>
                 {% endif %}
                 
@@ -196,7 +192,7 @@
 
                 {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}">Next</a>
                 </li>
                 {% endif %}
             </ul>
