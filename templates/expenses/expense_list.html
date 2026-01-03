@@ -12,20 +12,40 @@
     }
 </style>
 <div class="card shadow-lg border-0 fade-in">
-    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+    <!-- Mobile Header -->
+    <div class="card-header bg-transparent d-md-none d-flex justify-content-between align-items-center py-3">
+        <h2 class="h4 mb-0 fw-bold">Expenses</h2>
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'expense-create' %}" class="btn btn-primary btn-sm d-flex align-items-center gap-1">
+                <i class="bi bi-plus-lg"></i> <span>Add<span class="d-none d-sm-inline"> Expense</span></span>
+            </a>
+            <a href="{% url 'export-expenses' %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-link text-success text-decoration-none p-0 border-0" title="Export">
+                <i class="bi bi-download fs-5"></i>
+            </a>
+            <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 border-0 fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#expenseFilters" aria-expanded="false" aria-controls="expenseFilters">
+                <i class="bi bi-funnel me-1"></i> Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Desktop Header -->
+    <div class="card-header bg-transparent d-none d-md-flex justify-content-between align-items-center py-3">
         <h2 class="h4 mb-0 fw-bold">Expenses</h2>
         <div class="d-flex align-items-center gap-2">
             <a href="{% url 'expense-create' %}" class="btn btn-primary btn-sm d-inline-flex align-items-center text-nowrap">
                 <i class="bi bi-plus-lg me-1"></i> Add Expense
             </a>
-            <a href="{% url 'export-expenses' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
-                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export
+            <a href="{% url 'export-expenses' %}?{{ request.GET.urlencode }}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center">
+                <i class="bi bi-download me-1"></i> Export
             </a>
         </div>
     </div>
     
+
+
     <!-- Filter Form -->
-    <form method="get" class="mb-4 bg-body-tertiary p-3 rounded shadow-sm" id="filter-form" style="position: relative; z-index: 1060;">
+    <div class="collapse d-md-block" id="expenseFilters" style="z-index: 1060; position: relative;">
+        <form method="get" class="mb-4 bg-body-tertiary p-3 rounded shadow-sm" id="filter-form">
         <div class="row g-2 align-items-end flex-lg-nowrap">
             <!-- Search -->
             <div class="col-12 col-md-auto filter-w-search">
@@ -95,21 +115,28 @@
                 </a>
             </div>
 
-            <!-- Total Records -->
-            <div class="col-12 col-md-auto ms-auto mt-3 mt-md-0">
-                <div class="px-3 py-1 bg-body-tertiary border rounded shadow-sm d-flex align-items-center justify-content-center justify-content-md-start">
-                    <span class="small text-muted me-2">Total Records:</span>
-                    <span class="text-muted">
-                        {% if paginator %}
-                            {{ paginator.count }}
-                        {% else %}
-                            {{ expenses|length }}
-                        {% endif %}
-                    </span>
+
+        </div>
+    </form>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="px-3 mb-3 mt-3 mt-md-0">
+        <div class="row g-2">
+            <div class="col-6 col-md-auto">
+                <div class="p-2 border rounded bg-body-tertiary shadow-sm text-center text-md-start">
+                    <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Total Records</small>
+                    <span class="fw-bold">{{ filtered_count }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-auto">
+                <div class="p-2 border rounded bg-body-tertiary shadow-sm text-center text-md-start">
+                    <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Total Amount</small>
+                    <span class="fw-bold text-success">₹{{ filtered_amount|floatformat:2 }}</span>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 
     <script>
         function showLoader() {

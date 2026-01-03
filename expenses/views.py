@@ -495,6 +495,12 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Calculate stats for the filtered queryset
+        filtered_queryset = self.object_list
+        context['filtered_count'] = filtered_queryset.count()
+        context['filtered_amount'] = filtered_queryset.aggregate(Sum('amount'))['amount__sum'] or 0
+
         # Get unique years and categories for validation
         user_expenses = Expense.objects.filter(user=self.request.user)
         years_dates = user_expenses.dates('date', 'year', order='DESC')
@@ -543,7 +549,7 @@ class ExpenseCreateView(LoginRequiredMixin, generic.TemplateView):
 
     def get(self, request, *args, **kwargs):
         # We need to wrap the formset to pass 'user' to the form constructor
-        ExpenseFormSet = modelformset_factory(Expense, form=ExpenseForm, extra=3, can_delete=True)
+        ExpenseFormSet = modelformset_factory(Expense, form=ExpenseForm, extra=1, can_delete=True)
         # Pass user to form kwargs using formset_factory's form_kwargs (requires Django 4.0+)
         # For older Django or modelformset, we might need a custom formset or curry the form.
         # Simpler approach: Use a lambda or partial, but modelformset_factory creates a class.
@@ -554,12 +560,12 @@ class ExpenseCreateView(LoginRequiredMixin, generic.TemplateView):
         # Let's use form_kwargs in the formset initialization if supported.
         # Django 1.9+ supports form_kwargs in formset constructor.
         
-        initial_data = [{'date': datetime.now().date()} for _ in range(3)]
+        initial_data = [{'date': datetime.now().date()} for _ in range(1)]
         formset = ExpenseFormSet(queryset=Expense.objects.none(), initial=initial_data, form_kwargs={'user': request.user})
         return render(request, self.template_name, {'formset': formset})
 
     def post(self, request, *args, **kwargs):
-        ExpenseFormSet = modelformset_factory(Expense, form=ExpenseForm, extra=3, can_delete=True)
+        ExpenseFormSet = modelformset_factory(Expense, form=ExpenseForm, extra=1, can_delete=True)
         formset = ExpenseFormSet(request.POST, form_kwargs={'user': request.user})
         if formset.is_valid():
             instances = formset.save(commit=False)
