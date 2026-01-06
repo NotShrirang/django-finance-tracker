@@ -9,12 +9,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
-from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView, View
 from django.db.models import Sum, Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import json
+from django.utils import timezone
+from datetime import datetime, date, timedelta
+import calendar
+
+from .models import Expense, Category, Income, RecurringTransaction, UserProfile
+from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm, ProfileUpdateForm, CustomSignupForm
+from allauth.socialaccount.models import SocialAccount
+import openpyxl
+
 
 # ... existing imports ...
 
@@ -40,7 +49,12 @@ from .models import Expense, Category, Income, RecurringTransaction, UserProfile
 from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
 import openpyxl
 import calendar
-from datetime import datetime, date, timedelta
+# Duplicate imports removed for clarity, assuming they were part of the original document's structure.
+# from .models import Expense, Category, Income, RecurringTransaction, UserProfile
+# from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
+# import openpyxl
+# import calendar
+# from datetime import datetime, date, timedelta
 
 # --------------------
 # Mixins
@@ -88,8 +102,8 @@ class RecurringTransactionMixin:
 
 # Custom signup view to log user in immediately
 class SignUpView(generic.CreateView):
-    form_class = UserCreationForm
-    success_url = reverse_lazy('login')
+    form_class = CustomSignupForm
+    success_url = reverse_lazy('account_login')
     template_name = 'registration/signup.html'
 
 class LandingPageView(TemplateView):
@@ -1110,15 +1124,19 @@ class RecurringTransactionDeleteView(LoginRequiredMixin, DeleteView):
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
     model = User
-    template_name = 'expenses/account_confirm_delete.html'
     success_url = reverse_lazy('landing')
+    template_name = 'expenses/account_confirm_delete.html'
 
     def get_object(self, queryset=None):
         return self.request.user
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Your account has been successfully deleted. We're sorry to see you go!")
-        return super().delete(request, *args, **kwargs)
+        user = self.get_object()
+        logout(request) # Log out before deleting
+        user.delete()
+        messages.success(request, "Your account has been deleted successfully.")
+        return redirect(self.success_url)
+
 class CurrencyUpdateView(LoginRequiredMixin, UpdateView):
     model = UserProfile
     fields = ['currency']
@@ -1131,4 +1149,23 @@ class CurrencyUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         messages.success(self.request, 'Currency preference updated successfully.')
+        return super().form_valid(form)
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = ProfileUpdateForm
+    template_name = 'expenses/profile_settings.html'
+    success_url = reverse_lazy('profile-settings')
+
+    def get_object(self):
+        return self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Profile Settings'
+        context['is_social_user'] = SocialAccount.objects.filter(user=self.request.user).exists()
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Profile updated successfully.")
         return super().form_valid(form)

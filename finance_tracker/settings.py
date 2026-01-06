@@ -43,7 +43,12 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -137,7 +142,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'landing'
-LOGIN_URL = '/auth/login/'
+LOGIN_URL = 'account_login'
 
 # Allauth Settings
 AUTHENTICATION_BACKENDS = [
@@ -153,6 +158,8 @@ SITE_ID = int(os.environ.get('SITE_ID', 1))
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_SESSION_REMEMBER = False
+ACCOUNT_PASSWORD_CHANGE_REDIRECT_URL = 'profile-settings'
 
 # Social Account Providers
 SOCIALACCOUNT_PROVIDERS = {
@@ -166,3 +173,11 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+# Email Backend Configuration (SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')

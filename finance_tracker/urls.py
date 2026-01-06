@@ -22,7 +22,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('django.contrib.auth.urls')),
+    path('auth/login/', RedirectView.as_view(pattern_name='account_login', permanent=True)), # Redirect legacy login
     path('accounts/', include('allauth.urls')),
     path('favicon.ico', RedirectView.as_view(url='/static/img/pwa-icon-512.png')),
     path('apple-touch-icon.png', RedirectView.as_view(url='/static/img/pwa-icon-512.png')),

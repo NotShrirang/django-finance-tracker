@@ -1,4 +1,7 @@
 from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from allauth.socialaccount.models import SocialAccount
 from .models import Expense, Category, Income, RecurringTransaction
 
 class ExpenseForm(forms.ModelForm):
@@ -91,7 +94,62 @@ class RecurringTransactionForm(forms.ModelForm):
         if transaction_type == 'EXPENSE' and not category:
             self.add_error('category', 'Category is required for expenses.')
         
+
         if transaction_type == 'INCOME' and not source:
             self.add_error('source', 'Source is required for income.')
 
         return cleaned_data
+
+class ProfileUpdateForm(forms.ModelForm):
+    auth_email = forms.EmailField(required=True, label='Email Address')
+    first_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['auth_email'].initial = self.instance.email
+        self.fields['auth_email'].initial = self.instance.email
+        self.fields['auth_email'].widget.attrs.update({'class': 'form-control'})
+
+        # Check if user has social account
+        if SocialAccount.objects.filter(user=self.instance).exists():
+            for field in ['first_name', 'last_name', 'auth_email']:
+                self.fields[field].disabled = True
+                self.fields[field].widget.attrs['disabled'] = 'disabled'
+                self.fields[field].required = False
+            self.fields['auth_email'].help_text = "Managed by social login. You cannot change this info."
+
+    def clean_auth_email(self):
+        email = self.cleaned_data.get('auth_email')
+        
+        # If the email hasn't changed, allow it (even if duplicates exist in DB)
+        if email == self.instance.email:
+            return email
+            
+        if User.objects.filter(email=email).exclude(id=self.instance.id).exists():
+            raise forms.ValidationError("Email already assigned to another account.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['auth_email']
+        if commit:
+            user.save()
+        return user
+
+class CustomSignupForm(UserCreationForm):
+    email = forms.EmailField(required=True, label='Email Address')
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email

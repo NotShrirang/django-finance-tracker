@@ -268,7 +268,7 @@
                     
 
                     <li class="nav-item">
-                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        <form action="{% url 'account_logout' %}" method="post" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="nav-link btn btn-link text-decoration-none">
                                 Logout
@@ -277,7 +277,7 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a href="{% url 'login' %}" class="nav-link">
+                        <a href="{% url 'account_login' %}" class="nav-link">
                             <i class="bi bi-box-arrow-in-right me-1"></i> Login
                         </a>
                     </li>

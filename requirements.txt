@@ -3,3 +3,7 @@ openpyxl==3.1.5
 django-allauth==65.13.1
 PyJWT==2.10.1
 cryptography==46.0.3
+python-dotenv==1.0.0
+django-crispy-forms==2.5
+crispy-bootstrap5==2025.6
+requests==2.32.5
