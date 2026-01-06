@@ -8,12 +8,17 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 from django.core.wsgi import get_wsgi_application
 
-project_folder = os.path.expanduser('~/django-finance-tracker')  # adjust as appropriate
-load_dotenv(os.path.join(project_folder, '.env'))
+# Resolve the project root directory relative to this file
+# finance_tracker/wsgi.py -> parent = finance_tracker -> parent = root
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env file from the project root
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finance_tracker.settings')
 
