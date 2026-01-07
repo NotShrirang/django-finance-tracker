@@ -39,6 +39,36 @@ A personal finance application to track expenses, analyze spending trends, and v
     python manage.py migrate
     ```
 
+## Docker Setup
+
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd django-finance-tracker
+    ```
+
+2.  **Create `.env` file**:
+    Create a file named `.env` in the root directory. Fill in the values:
+    ```env
+    SECRET_KEY=''
+    DEBUG=True
+    EMAIL_HOST='smtp.gmail.com' # if you want to use gmail for sending emails
+    EMAIL_PORT=587
+    EMAIL_USE_TLS=True
+    EMAIL_HOST_USER=''
+    EMAIL_HOST_PASSWORD=''
+    ```
+    **Note**: The application will not run correctly without this file.
+
+3.  **Run with Docker Compose**:
+    ```bash
+    docker-compose up --build
+    ```
+
+4.  **Access the application**:
+    Open your browser and navigate to `http://localhost:8000`.
+
+
 ## Usage
 
 ### Running the Server

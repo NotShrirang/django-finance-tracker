@@ -10,6 +10,21 @@
             Upload your Excel file to update your expense records. Each sheet corresponds to a month.
         </p>
 
+        <div class="alert alert-info border-0 shadow-sm mb-4">
+            <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-2"></i>Required Format</h6>
+            <p class="mb-2 small">Your Excel file <strong>must</strong> contain the following columns (headers are Case-Sensitive):</p>
+            <ul class="small mb-3">
+                <li><code>Date</code> (e.g., <i>01 Jan 2025</i>, <i>2025-01-01</i>)</li>
+                <li><code>Amount</code> (Numeric value)</li>
+                <li><code>Description</code> (Text details)</li>
+                <li><code>Category</code> (e.g., Food, Travel)</li>
+            </ul>
+            <p class="mb-0 small text-muted">
+                <strong>Note:</strong> The "Select Year" below will override the year in your excel dates to ensure consistency.
+            </p>
+        </div>
+
+
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
