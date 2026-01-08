@@ -269,7 +269,7 @@ def home_view(request):
     # 3. Convert map to list of dataset objects for Chart.js
     trend_datasets = []
     # Define a color palette (Light Blue, Blue Green, Prussian Blue, Honey Yellow, Orange)
-    colors = ['#8ECAE6', '#219EBC', '#023047', '#FFB703', '#FB8500']
+    colors = ['#219EBC', '#023047', '#8ECAE6', '#FFB703', '#0575E6']
     
     for i, (cat, data) in enumerate(dataset_map.items()):
         # Only include non-zero datasets

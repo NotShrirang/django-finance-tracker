@@ -109,14 +109,14 @@
 <!-- Summary Cards Row -->
 <div class="row g-4 mb-4">
     <!-- Total Income -->
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.0s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-cash-coin me-2"></i>Total Income</h5>
-                <div class="d-flex align-items-center mb-0">
+                <div class="d-flex flex-wrap align-items-center mb-0 gap-2">
                     <h2 class="display-6 fw-bold mb-0">{{ currency_symbol }}{{ total_income|floatformat:0 }}</h2>
                     {% if prev_month_data.income_pct is not None %}
-                        <span class="badge rounded-pill {% if prev_month_data.income_pct >= 0 %}bg-success{% else %}bg-danger{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
+                        <span class="badge rounded-pill {% if prev_month_data.income_pct >= 0 %}bg-success{% else %}bg-danger{% endif %}" style="font-size: 0.75rem;" title="vs last month">
                             <i class="bi bi-arrow-{% if prev_month_data.income_pct >= 0 %}up{% else %}down{% endif %}"></i>
                             {{ prev_month_data.income_pct_abs|floatformat:1 }}%
                         </span>
@@ -137,14 +137,14 @@
         </div>
     </div>
     <!-- Total Expenses -->
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.1s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-wallet2 me-2"></i>Total Expenses</h5>
-                <div class="d-flex align-items-center mb-0">
+                <div class="d-flex flex-wrap align-items-center mb-0 gap-2">
                     <h2 class="display-6 fw-bold mb-0">{{ currency_symbol }}{{ total_expenses|floatformat:0 }}</h2>
                     {% if prev_month_data.expense_pct is not None %}
-                        <span class="badge rounded-pill {% if prev_month_data.expense_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
+                        <span class="badge rounded-pill {% if prev_month_data.expense_pct > 0 %}bg-danger{% else %}bg-success{% endif %}" style="font-size: 0.75rem;" title="vs last month">
                             <i class="bi bi-arrow-{% if prev_month_data.expense_pct > 0 %}up{% else %}down{% endif %}"></i>
                             {{ prev_month_data.expense_pct_abs|floatformat:1 }}%
                         </span>
@@ -166,14 +166,14 @@
     </div>
     
     <!-- Savings -->
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.2s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-piggy-bank me-2"></i>Savings</h5>
-                <div class="d-flex align-items-center mb-0">
+                <div class="d-flex flex-wrap align-items-center mb-0 gap-2">
                     <h2 class="display-6 fw-bold mb-0">{{ currency_symbol }}{{ savings|floatformat:0 }}</h2>
                     {% if prev_month_data.savings_pct is not None %}
-                        <span class="badge rounded-pill {% if prev_month_data.savings_pct >= 0 %}bg-success{% else %}bg-danger{% endif %} ms-2" style="font-size: 0.75rem;" title="vs last month">
+                        <span class="badge rounded-pill {% if prev_month_data.savings_pct >= 0 %}bg-success{% else %}bg-danger{% endif %}" style="font-size: 0.75rem;" title="vs last month">
                             <i class="bi bi-arrow-{% if prev_month_data.savings_pct >= 0 %}up{% else %}down{% endif %}"></i>
                             {{ prev_month_data.savings_pct_abs|floatformat:1 }}%
                         </span>
@@ -195,7 +195,7 @@
     </div>
 
     <!-- Top Category (Restored) -->
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.3s">
             <div class="card-body">
                 <h5 class="card-title opacity-75"><i class="bi bi-tags-fill me-2"></i>Top Category</h5>
@@ -212,24 +212,8 @@
 </div>
 
 <div class="row g-4 mb-4">
-    <!-- Top Category KPI -->
-    <!-- <div class="col-md-4">
-        <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.2s">
-            <div class="card-body">
-                <h5 class="card-title opacity-75"><i class="bi bi-tags-fill me-2"></i>Top Category</h5>
-                {% if top_category %}
-                    <h2 class="display-6 fw-bold mb-0">{{ top_category.category }}</h2>
-                    <small class="opacity-75">₹{{ top_category.total|floatformat:2 }}</small>
-                {% else %}
-                    <h2 class="display-6 fw-bold mb-0">-</h2>
-                    <small class="opacity-75">No data</small>
-                {% endif %}
-            </div>
-        </div>
-    </div> -->
-
     <!-- Income vs Expenses Chart -->
-    <div class="col-md-12">
+    <div class="col-md-4">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.3s">
             <div class="card-header bg-transparent fw-bold">
                 Income vs Expenses
@@ -237,6 +221,37 @@
             <div class="card-body">
                 <div style="height: 250px; width: 100%;">
                     <canvas id="incomeExpensesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget vs Spent Chart -->
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.4s">
+            <div class="card-header bg-transparent fw-bold">
+                Budget vs Spent
+            </div>
+            <div class="card-body">
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+                {% if not category_limits %}
+                <div class="text-center text-muted mt-3">No limits set</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 5 Highest Expenses -->
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.5s">
+            <div class="card-header bg-transparent fw-bold">
+                Top 5 Highest Expenses
+            </div>
+            <div class="card-body">
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="topExpensesChart"></canvas>
                 </div>
             </div>
         </div>
@@ -276,39 +291,7 @@
     </div>
 </div>
 
-<!-- Charts Row 2: Top 5 + Budget -->
-<div class="row g-4 mb-4">
-    <!-- Top Expenses -->
-    <div class="col-md-6">
-        <div class="card shadow-lg border-0 h-100">
-            <div class="card-header bg-transparent fw-bold">
-                Top 5 Highest Expenses
-            </div>
-            <div class="card-body">
-                <div style="height: 250px; width: 100%;">
-                    <canvas id="topExpensesChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Budget vs Spent Chart -->
-    <div class="col-md-6">
-        <div class="card shadow-lg border-0 h-100">
-            <div class="card-header bg-transparent fw-bold">
-                Budget vs Spent (Categories with Monthly Limits)
-            </div>
-            <div class="card-body">
-                <div style="height: 250px; width: 100%;">
-                    <canvas id="budgetChart"></canvas>
-                </div>
-                {% if not category_limits %}
-                <div class="text-center text-muted mt-3">No categories with limits set</div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Charts Row 3: Recent Transactions + Category Summary -->
 <div class="row g-4 mb-4">
@@ -471,7 +454,7 @@
                     {
                         label: 'Expenses',
                         data: [totalExpenses],
-                        backgroundColor: '#FB8500',
+                        backgroundColor: '#023047',
                         borderRadius: 4,
                         barThickness: 50
                     },
@@ -542,7 +525,7 @@
                     labels: categories,
                     datasets: [{
                         data: categoryAmounts,
-                        backgroundColor: ['#8ECAE6', '#219EBC', '#023047', '#FFB703', '#FB8500'],
+                        backgroundColor: ['#219EBC', '#023047', '#8ECAE6', '#FFB703', '#0575E6'],
                         borderWidth: 0
                     }]
                 },
@@ -586,7 +569,7 @@
                 datasets: [{
                     label: 'Amount',
                     data: topAmounts,
-                    backgroundColor: '#FB8500',
+                    backgroundColor: '#219EBC',
                     borderRadius: 4
                 }]
             },
@@ -619,7 +602,7 @@
                         {
                             label: 'Spent',
                             data: spentData,
-                            backgroundColor: withLimits.map(item => item.total > item.limit ? '#FB8500' : '#219EBC'),
+                            backgroundColor: withLimits.map(item => item.total > item.limit ? '#dc3545' : '#219EBC'),
                             borderRadius: 4,
                         },
                         {
