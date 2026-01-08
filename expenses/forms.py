@@ -7,11 +7,12 @@ from .models import Expense, Category, Income, RecurringTransaction
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
-        fields = ['date', 'amount', 'description', 'category']
+        fields = ['date', 'amount', 'description', 'category', 'payment_method']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'payment_method': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):

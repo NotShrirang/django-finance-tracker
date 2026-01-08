@@ -8,6 +8,16 @@ class Expense(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     category = models.CharField(max_length=255)
+    
+    PAYMENT_OPTIONS = [
+        ('Cash', 'Cash'),
+        ('Credit Card', 'Credit Card'),
+        ('Debit Card', 'Debit Card'),
+        ('UPI', 'UPI'),
+        ('NetBanking', 'NetBanking'),
+    ]
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_OPTIONS, default='Cash')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

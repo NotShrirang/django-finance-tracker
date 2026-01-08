@@ -162,6 +162,7 @@
                         <th class="ps-4">Date</th>
                         <th>Description</th>
                         <th>Category</th>
+                        <th>Payment Method</th>
                         <th>Amount</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
@@ -174,6 +175,7 @@
                         <td>
                             <span class="badge bg-secondary opacity-75">{{ expense.category }}</span>
                         </td>
+                        <td>{{ expense.payment_method }}</td>
                         <td class="fw-bold">{{ expense.amount }}</td>
                         <td class="text-end pe-4">
                             <a href="{% url 'expense-edit' expense.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">

@@ -31,6 +31,7 @@
                                         <th style="min-width: 130px;">Amount</th>
                                         <th style="min-width: 200px;">Description</th>
                                         <th style="min-width: 200px;">Category</th>
+                                        <th style="min-width: 150px;">Payment Method</th>
                                         <th style="width: 50px;"></th>
                                     </tr>
                                 </thead>
@@ -38,7 +39,7 @@
                                     {% for form in formset %}
                                     <tr class="form-row">
                                         {% for field in form %}
-                                            {% if field.name in 'date,amount,description,category' %}
+                                            {% if field.name in 'date,amount,description,category,payment_method' %}
                                             <td class="p-1">
                                                 {% if forloop.first %}
                                                     {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
@@ -52,6 +53,8 @@
                                                             <i class="bi bi-plus-lg"></i>
                                                         </button>
                                                     </div>
+                                                {% elif field.name == 'payment_method' %}
+                                                    {{ field }}
                                                 {% else %}
                                                     <input type="{% if field.name == 'date' %}date{% else %}{{ field.field.widget.input_type|default:'text' }}{% endif %}" 
                                                         name="{{ field.html_name }}" 
@@ -113,6 +116,8 @@
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
                                 </div>
+                            {% elif field.name == 'payment_method' %}
+                                {{ field }}
                             {% else %}
                                 <input type="{% if field.name == 'date' %}date{% else %}{{ field.field.widget.input_type|default:'text' }}{% endif %}" 
                                     name="{{ field.name }}" 

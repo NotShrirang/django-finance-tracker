@@ -555,9 +555,19 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
             if end_date:
                 queryset = queryset.filter(date__lte=end_date)
         else:
-            # Default to current year ONLY on initial land (no params)
-            if not self.request.GET and not (selected_years or selected_months):
+            # Check if any specific filter is active
+            has_active_filters = (
+                selected_years or 
+                selected_months or 
+                search_query  # Don't check categories as we might want defaults even if cat is selected? No, usually filters are additive.
+            )
+            
+            # If no year/month/search filters, default to current month/year
+            # (ignoring category here might be debated, but typically if I just filter 'Food', I might want all time or current month? 
+            #  The dashboard logic defaults to current month if no year/month. Let's stick to that.)
+            if not has_active_filters:
                 selected_years = [str(datetime.now().year)]
+                selected_months = [str(datetime.now().month)]
             
             if selected_years:
                 queryset = queryset.filter(date__year__in=selected_years)
@@ -609,13 +619,23 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
             selected_years = self.request.GET.getlist('year')
             selected_months = self.request.GET.getlist('month')
             selected_categories = self.request.GET.getlist('category')
+            search_query = self.request.GET.get('search')
             
             # Remove empty strings
             selected_years = [y for y in selected_years if y]
             selected_months = [m for m in selected_months if m]
             selected_categories = [c for c in selected_categories if c]
 
-            if not self.request.GET and not (selected_years or selected_months):
+            # Check if any specific filter is active
+            has_active_filters = (
+                selected_years or 
+                selected_months or 
+                search_query 
+                # (ignoring category here as well to match get_queryset)
+            )
+
+            # Mirror default logic from get_queryset
+            if not has_active_filters:
                 selected_years = [str(datetime.now().year)]
                 selected_months = [str(datetime.now().month)]
             
