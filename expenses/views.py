@@ -412,8 +412,18 @@ def home_view(request):
         'prev_month_data': prev_month_data,
         'prev_month_url': prev_month_url,
         'next_month_url': next_month_url,
+        'show_tutorial': not request.user.profile.has_seen_tutorial or request.GET.get('tour') == 'true',
     }
     return render(request, 'home.html', context)
+
+@login_required
+def complete_tutorial(request):
+    if request.method == 'POST':
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        profile.has_seen_tutorial = True
+        profile.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
 
 @login_required
 def upload_view(request):

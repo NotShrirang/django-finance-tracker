@@ -139,6 +139,7 @@ class RecurringTransaction(models.Model):
 
     def __str__(self):
         return f"{self.transaction_type} - {self.description} ({self.frequency})"
+        
 class UserProfile(models.Model):
     CURRENCY_CHOICES = [
         ('₹', 'Indian Rupee (₹)'),
@@ -155,6 +156,7 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES, default='₹')
+    has_seen_tutorial = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

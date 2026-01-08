@@ -334,3 +334,90 @@ a:hover {
         content: "Remove Item";
     }
 }
+/* --- Driver.js Tutorial Theme Customization --- */
+
+/* Default (Light Mode) */
+.driver-popover {
+    background-color: var(--surface-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+.driver-popover-title {
+    font-family: 'Clash Display', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 8px !important;
+    color: var(--color-primary) !important;
+}
+
+.driver-popover-description {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    color: #495057 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Tutorial Buttons */
+.driver-popover-footer button {
+    border-radius: 6px !important;
+    text-shadow: none !important;
+    font-size: 0.85rem !important;
+    padding: 6px 14px !important;
+    font-weight: 500 !important;
+}
+
+.driver-popover-next-btn {
+    background-color: var(--color-success) !important; /* Teal */
+    color: white !important;
+    border: none !important;
+}
+
+.driver-popover-prev-btn {
+    background-color: transparent !important;
+    color: var(--text-main) !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.driver-popover-close-btn {
+    color: var(--text-main) !important;
+}
+
+/* Dark Mode Overrides */
+[data-bs-theme="dark"] .driver-popover {
+    background-color: #1e2126 !important; /* Slightly lighter than surface for popover */
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+}
+
+[data-bs-theme="dark"] .driver-popover-title {
+    color: white !important;
+}
+
+[data-bs-theme="dark"] .driver-popover-description {
+    color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .driver-popover-prev-btn {
+    color: #e9ecef !important;
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+[data-bs-theme="dark"] .driver-popover-close-btn {
+    color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .driver-popover-close-btn:hover {
+    color: white !important;
+}
+
+/* Speed up Driver.js animations */
+.driver-active-element,
+.driver-popover {
+    transition-duration: 0.1s !important;
+}

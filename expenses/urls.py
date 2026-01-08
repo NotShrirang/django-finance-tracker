@@ -35,4 +35,5 @@ urlpatterns = [
     path('settings/currency/', views.CurrencyUpdateView.as_view(), name='currency-settings'),
     path('settings/profile/', views.ProfileUpdateView.as_view(), name='profile-settings'),
     path('account/delete/', views.AccountDeleteView.as_view(), name='account-delete'),
+    path('tutorial/complete/', views.complete_tutorial, name='complete-tutorial'),
 ]

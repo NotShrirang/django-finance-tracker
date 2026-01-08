@@ -250,7 +250,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'expense-list' %}" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'expense-list' %}" id="nav-expenses" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
                             Expenses
                         </a>
                     </li>
@@ -260,7 +260,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'category-list' %}"
+                        <a href="{% url 'category-list' %}" id="nav-settings"
                             class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
                             Settings
                         </a>
@@ -436,7 +436,7 @@
     <!-- Mobile Floating Action Button -->
     <div class="d-md-none position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
         <div class="dropdown">
-            <button class="btn btn-primary btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
+            <button id="mobile-fab" class="btn btn-primary btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
                     style="width: 60px; height: 60px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-plus-lg fs-2"></i>
             </button>
@@ -564,7 +564,23 @@
         });
     </script>
 
+    <!-- Driver.js for Tutorial -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    
     {% block scripts %}{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+    <script src="{% static 'js/tutorial.js' %}"></script>
+    <script>
+        // Set the URL for marking tutorial as complete globally for tutorial.js
+        window.tutorialCompleteUrl = "{% url 'complete-tutorial' %}";
+        
+        {% if show_tutorial %}
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(startTour, 1000); // Small delay to ensure rendering
+        });
+        {% endif %}
+    </script>
 </body>
 
 </html>
