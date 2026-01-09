@@ -441,10 +441,10 @@
         })()
     </script>
     {% if user.is_authenticated %}
-    <!-- Mobile Floating Action Button -->
-    <div class="d-md-none position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
+    <!-- Floating Action Button -->
+    <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
         <div class="dropdown">
-            <button id="mobile-fab" class="btn btn-primary btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
+            <button id="global-fab" class="btn btn-primary btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
                     style="width: 60px; height: 60px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-plus-lg fs-2"></i>
             </button>
@@ -456,7 +456,7 @@
                 </li>
                 <li>
                     <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'income-create' %}">
-                        <i class="bi bi-plus-circle text-teal me-2"></i> Add Income
+                        <i class="bi bi-plus-circle text-success me-2"></i> Add Income
                     </a>
                 </li>
             </ul>
@@ -585,7 +585,10 @@
         
         {% if show_tutorial %}
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(startTour, 1000); // Small delay to ensure rendering
+            setTimeout(() => {
+                const mode = window.isOnboarding ? 'onboarding' : 'standard';
+                startTour(mode);
+            }, 1000); 
         });
         {% endif %}
     </script>

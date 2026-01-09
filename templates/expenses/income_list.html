@@ -101,16 +101,18 @@
                         </td>
                         <td>{{ income.description|default:"-"|truncatechars:30 }}</td>
                         <td class="fw-bold text-success">{{ income.amount|floatformat:2 }}</td>
-                        <td class="text-end pe-4">
-                            <a href="{% url 'income-edit' income.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
-                                <i class="bi bi-pencil-square text-primary"></i>
-                            </a>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn" 
-                                    data-bs-toggle="modal" data-bs-target="#deleteModal" 
-                                    data-url="{% url 'income-delete' income.pk %}"
-                                    data-message="Are you sure you want to delete '{{ income.source }}'?">
-                                <i class="bi bi-trash text-danger"></i>
-                            </button>
+                        <td class="text-end pe-4 text-nowrap">
+                            <div class="hstack gap-3 justify-content-end">
+                                <a href="{% url 'income-edit' income.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 d-inline-flex align-items-center" title="Edit">
+                                    <i class="bi bi-pencil-square text-primary fs-6"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn d-inline-flex align-items-center" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                        data-url="{% url 'income-delete' income.pk %}"
+                                        data-message="Are you sure you want to delete '{{ income.source }}'?">
+                                    <i class="bi bi-trash text-danger fs-6"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}

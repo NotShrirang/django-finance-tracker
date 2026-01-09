@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from allauth.socialaccount.models import SocialAccount
 from .models import Expense, Category, Income, RecurringTransaction
 
+from datetime import date
+
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
@@ -18,6 +20,7 @@ class ExpenseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        self.fields['date'].initial = date.today
         
         # If user is provided, populate category choices
         if user:
@@ -48,6 +51,7 @@ class IncomeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        self.fields['date'].initial = date.today
         
     def clean_source(self):
         source = self.cleaned_data.get('source')

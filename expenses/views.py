@@ -383,7 +383,195 @@ def home_view(request):
         except ValueError:
             pass
     
+    # --- Emotional Feedback / Insights Logic (Enhanced) ---
+    from django.utils.html import mark_safe, escape, format_html, format_html_join
+    
+    insights = []
+    
+    # helper for streaks
+    def get_monthly_savings_status(u, y, m):
+        inc = Income.objects.filter(user=u, date__year=y, date__month=m).aggregate(Sum('amount'))['amount__sum'] or 0
+        exp = Expense.objects.filter(user=u, date__year=y, date__month=m).aggregate(Sum('amount'))['amount__sum'] or 0
+        return inc > exp
+
+    # Construct date params for deep linking
+    date_params = ""
+    for y in selected_years:
+        date_params += f"&year={y}"
+    for m in selected_months:
+        date_params += f"&month={m}"
+
+    # helper for category links
+    def link_cats(cats):
+        links_html = format_html_join(
+            mark_safe(', '),
+            '<a href="{}" class="alert-link text-decoration-underline">{}</a>',
+            ((reverse('expense-list') + f"?category={c}{date_params}", c) for c in cats[:2])
+        )
+        if len(cats) > 2:
+            return format_html('{}, etc.', links_html)
+        return links_html
+
+    # 1. Budget Warnings (High Priority)
+    over_budget_cats = [c['name'] for c in category_limits if c['used_percent'] is not None and c['used_percent'] > 100]
+    near_budget_cats = [c['name'] for c in category_limits if c['used_percent'] is not None and 90 <= c['used_percent'] <= 100]
+    
+    # Check savings rate for "Softener" context
+    savings_rate = (savings / total_income * 100) if total_income > 0 else 0
+    
+    if over_budget_cats:
+        cats_str = link_cats(over_budget_cats)
+        
+        if savings_rate >= 20:
+            # Contextualized Warning for High Savers
+            msg = format_html("Even strong months have leaks. You crossed limits in {} — catching this keeps you on track.", cats_str)
+        else:
+            # Standard Coaching Warning - "Warning" type (Yellow) instead of Danger (Red) for empathy
+            msg = format_html("⚠️ Budget crossed in {} — let’s rebalance to stay safe.", cats_str)
+
+        insights.append({
+            'type': 'warning', # Changed from danger
+            'icon': 'exclamation-octagon-fill',
+            'title': 'Budget Breached',
+            'message': msg,
+            'allow_share': False
+        })
+    elif near_budget_cats:
+        cats_str = link_cats(near_budget_cats)
+        insights.append({
+            'type': 'warning',
+            'icon': 'exclamation-triangle-fill',
+            'title': 'Approaching Limit',
+            'message': format_html("Heads up! You're close to overspending on {}.", cats_str),
+            'allow_share': False
+        })
+
+    # 2. Wins & Cause-Based Praise (Specific & Celebratory)
+    if prev_month_data:
+        # Calculate Category Savings (Cause of the win)
+        # We need prev month category breakdown
+        prev_cat_qs = Expense.objects.filter(user=request.user, date__year=prev_year, date__month=prev_month).values('category').annotate(total=Sum('amount'))
+        prev_cat_map = {item['category'].strip(): float(item['total']) for item in prev_cat_qs}
+        
+        savings_contributors = []
+        for cat, curr_total in merged_category_map.items():
+            prev_total = prev_cat_map.get(cat, 0)
+            if prev_total > curr_total:
+                diff = prev_total - curr_total
+                if diff > 100: # Threshold to mention
+                    savings_contributors.append((cat, diff))
+        savings_contributors.sort(key=lambda x: x[1], reverse=True)
+        top_savers = [c[0] for c in savings_contributors[:2]]
+        
+        # Savings Win
+        if total_income > 0 and savings > 0:
+            savings_rate = (savings / total_income) * 100
+            if savings_rate >= 20:
+                msg_text = f"You've saved {savings_rate:.0f}% of your income this month."
+                share_text = f"I saved {savings_rate:.0f}% of my income this month using TrackMyRupee! 🏆"
+                
+                if top_savers:
+                    cats_link = link_cats(top_savers)
+                    msg = format_html("{} You spent less on {} — that's where the magic happened.", msg_text, cats_link)
+                else:
+                    msg = msg_text
+
+                insights.append({
+                    'type': 'success',
+                    'icon': 'trophy-fill',
+                    'title': 'Super Saver Status! 🏆',
+                    'message': msg,
+                    'allow_share': True,
+                    'share_text': share_text
+                })
+            elif prev_month_data['savings_pct'] and prev_month_data['savings_pct'] > 0:
+                 insights.append({
+                    'type': 'success',
+                    'icon': 'graph-up-arrow',
+                    'title': 'Momentum Building 🚀',
+                    'message': f"Your savings grew by {prev_month_data['savings_pct_abs']:.0f}% vs last month. You're getting better at this!",
+                    'allow_share': True,
+                    'share_text': f"My savings grew by {prev_month_data['savings_pct_abs']:.0f}% this month! 🚀 via TrackMyRupee"
+                })
+        
+        # Expense Control Win (if we haven't already praised savings)
+        if len(insights) == 0: 
+            if prev_month_data['expense_pct'] and prev_month_data['expense_pct'] < -5:
+                 msg_text = f"You've cut spending by {prev_month_data['expense_pct_abs']:.0f}%."
+                 share_text = f"I cut my spending by {prev_month_data['expense_pct_abs']:.0f}% this month! 👍 via TrackMyRupee"
+                 
+                 if top_savers:
+                     cats_link = link_cats(top_savers)
+                     msg = format_html("{} {} saw the biggest drops.", msg_text, cats_link)
+                 else:
+                     msg = msg_text
+                 
+                 insights.append({
+                    'type': 'success',
+                    'icon': 'check-circle-fill',
+                    'title': 'You’re in Control 👍',
+                    'message': msg,
+                    'allow_share': True,
+                    'share_text': share_text
+                })
+
+    # 3. Streak & Identity (Reassuring / Habit Forming)
+    # Only calculate if current status is good
+    if savings > 0 and len(selected_years) == 1 and len(selected_months) == 1:
+        streak = 1 # Current month counts
+        check_to_go = 5 # check max 5 months back
+        curr_y_calc, curr_m_calc = int(selected_years[0]), int(selected_months[0])
+        
+        for i in range(check_to_go):
+            # Go back one month
+            if curr_m_calc == 1:
+                curr_m_calc = 12
+                curr_y_calc -= 1
+            else:
+                curr_m_calc -= 1
+            
+            if get_monthly_savings_status(request.user, curr_y_calc, curr_m_calc):
+                streak += 1
+            else:
+                break
+        
+        if streak > 1:
+            insights.append({
+                'type': 'info', # Use Info for "Identity/Streak"
+                'icon': 'fire',
+                'title': 'On a Roll!',
+                'message': f"🔥 This is your {streak}th month in a row staying under budget.",
+                'allow_share': True,
+                'share_text': f"🔥 I've stayed under budget for {streak} months in a row! via TrackMyRupee"
+            })
+
+    # 4. Fallback
+    if not insights and savings > 0:
+        insights.append({
+            'type': 'info',
+            'icon': 'piggy-bank-fill',
+            'title': 'In the Green',
+            'message': f"You've saved {savings} so far. Keep it up!",
+            'allow_share': False
+        })
+    elif not insights:
+        insights.append({
+            'type': 'secondary',
+            'icon': 'stars',
+            'title': 'Fresh Start',
+            'message': "Small steps today lead to big results tomorrow. Let's track some expenses!",
+            'allow_share': False
+        })
+
+    # Limit to top 2 insights to avoid clutter
+    insights = insights[:2]
+
+    # Check for onboarding (True if user has NO data at all)
+    has_any_data = Expense.objects.filter(user=request.user).exists() or Income.objects.filter(user=request.user).exists()
+
     context = {
+        'is_new_user': not has_any_data,
+        'insights': insights,
         'total_income': total_income,
         'savings': savings,
         'recent_transactions': expenses.order_by('-date')[:5],
@@ -413,6 +601,7 @@ def home_view(request):
         'prev_month_url': prev_month_url,
         'next_month_url': next_month_url,
         'show_tutorial': not request.user.profile.has_seen_tutorial or request.GET.get('tour') == 'true',
+        'has_any_budget': any((c.get('limit') or 0) > 0 for c in category_limits),
     }
     return render(request, 'home.html', context)
 

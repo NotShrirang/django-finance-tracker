@@ -2,36 +2,75 @@
 const driver = window.driver?.js?.driver || window.driver;
 
 const desktopSteps = [
-    { element: '.navbar-brand', popover: { title: 'Welcome to TrackMyRupee!', description: 'This is your personal finance dashboard. Let\'s take a quick tour to verify everything is set up correctly.', side: "bottom", align: 'start' } },
-    { element: '.bi-moon-stars-fill, .bi-sun-fill', popover: { title: 'Theme Toggle', description: 'Switch between Dark and Light modes here. The app adapts to your system preference by default.', side: "bottom", align: 'end' } },
-    { element: '.col-md-3:nth-child(1)', popover: { title: 'Income Overview', description: 'Track your total income here. Compare it with last month to see your growth.', side: "bottom", align: 'start' } },
-    { element: '.col-md-3:nth-child(2)', popover: { title: 'Expense Tracking', description: 'Keep an eye on your spending. We highlight if you\'re spending more than last month.', side: "bottom", align: 'start' } },
-    { element: '.col-md-4:nth-child(2)', popover: { title: 'Budget Management', description: 'Visual bars show how much of your budget you\'ve used. Set limits in Settings.', side: "top", align: 'start' } },
-    { element: '#nav-expenses', popover: { title: 'Detailed List', description: 'View, edit, or delete individual transactions here.', side: "bottom", align: 'start' } },
-    { element: '#nav-settings', popover: { title: 'Settings', description: 'Manage Categories, Budgets, and Currency preferences here.', side: "bottom", align: 'start' } },
+    { element: '#tour-income-card', popover: { title: 'Financial Overview', description: 'Track your Income and Expenses here to see your monthly growth.', side: "bottom", align: 'start' } },
+    { element: '#tour-budget-card', popover: { title: 'Budget Limits', description: 'Visual bars help you stay within your category limits.', side: "top", align: 'start' } },
+    { element: '#nav-expenses', popover: { title: 'Transaction List', description: 'View and manage your detailed transaction history here.', side: "bottom", align: 'start' } },
+    { element: '#global-fab', popover: { title: 'Quick Actions', description: 'Click (+) to instantly add a new Income or Expense.', side: "top", align: 'end' } },
 ];
 
 const mobileSteps = [
-    { element: '.navbar-brand', popover: { title: 'Welcome!', description: 'TrackMyRupee helps you manage money on the go.', side: "bottom", align: 'start' } },
-    { element: '.navbar-toggler', popover: { title: 'Menu', description: 'Tap here to access Settings, Dark Mode, and Logout.', side: "bottom", align: 'end' } },
-    { element: '.col-6:nth-child(1)', popover: { title: 'Income', description: 'Your total income summary.', side: "bottom", align: 'center' } },
-    { element: '.col-6:nth-child(2)', popover: { title: 'Expenses', description: 'Your total expenses.', side: "bottom", align: 'center' } },
-    { element: '#mobile-fab', popover: { title: 'Quick Actions', description: 'Tap the + button to instantly record a new Transaction.', side: "top", align: 'end' } },
+    { element: '.navbar-toggler', popover: { title: 'Menu & Settings', description: 'Access your Settings, Theme, and other options here.', side: "bottom", align: 'end' } },
+    { element: '#tour-income-card', popover: { title: 'Income', description: 'Track your total monthly income.', side: "bottom", align: 'center' } },
+    { element: '#tour-expenses-card', popover: { title: 'Expenses', description: 'Monitor your total monthly spending.', side: "bottom", align: 'center' } },
+    { element: '#global-fab', popover: { title: 'Add New', description: 'Tap (+) to record a transaction.', side: "top", align: 'end' } },
 ];
 
 const isMobile = window.innerWidth < 768; // Bootstrap md breakpoint
 
-const tourDriver = driver({
-    animate: true,
-    showProgress: true,
-    steps: isMobile ? mobileSteps : desktopSteps,
-    onDestroyStarted: () => {
-        markTutorialComplete();
-        tourDriver.destroy();
-    },
-});
+const onboardingSteps = [
+    { element: '#hero-card', popover: { title: 'Welcome Aboard! 🚀', description: 'This is your starting point. Since you are new, we have simplified things for you.', side: "top", align: 'center' } },
+    { element: '#hero-income-btn', popover: { title: 'Record Income', description: 'Got your salary? Click here to add your first income entry.', side: "bottom", align: 'start' } },
+    { element: '#hero-expense-btn', popover: { title: 'Add Expense', description: 'Spent money on coffee? Click here to log your first expense.', side: "bottom", align: 'end' } },
+];
 
-function startTour() {
+// Global instance to hold the driver
+let tourDriver;
+
+function startTour(mode = 'standard') {
+    console.log('Starting Tour... Mode:', mode);
+    
+    // Lazy resolve the driver library
+    const driverLib = window.driver?.js?.driver || window.driver;
+    if (!driverLib) {
+        console.error('Driver.js library not found! Is the CDN script loaded?');
+        return;
+    }
+
+    // Select steps based on mode
+    let steps;
+    if (mode === 'onboarding') {
+        steps = onboardingSteps;
+    } else {
+        steps = isMobile ? mobileSteps : desktopSteps;
+    }
+    
+    console.log('Tour Steps:', steps);
+    
+    // Verify elements exist (Debug)
+    steps.forEach((step, index) => {
+        const el = document.querySelector(step.element);
+        if (!el) console.warn(`Step ${index + 1} element not found:`, step.element);
+    });
+
+    // Destroy existing driver if it exists to clean up
+    if (tourDriver) {
+        tourDriver.destroy();
+    }
+
+    // Instantiate NEW driver with the chosen steps
+    tourDriver = driverLib({
+        animate: true,
+        showProgress: true,
+        steps: steps, // Pass steps directly here
+        onDestroyStarted: () => {
+            markTutorialComplete();
+            if (tourDriver) {
+                tourDriver.destroy();
+                tourDriver = null;
+            }
+        },
+    });
+
     tourDriver.drive();
 }
 
