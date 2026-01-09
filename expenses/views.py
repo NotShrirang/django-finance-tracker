@@ -1027,10 +1027,17 @@ class CalendarView(LoginRequiredMixin, RecurringTransactionMixin, TemplateView):
                     })
             calendar_data.append(week_data)
         
+        
+        # Calculate totals for the month to show net savings
+        total_monthly_expense = sum(item['total'] for item in expenses) or 0
+        total_monthly_income = sum(item['total'] for item in incomes) or 0
+        month_net_savings = total_monthly_income - total_monthly_expense
+
         context['calendar_data'] = calendar_data
         context['current_year'] = year
         context['current_month'] = month
         context['month_name'] = calendar.month_name[month]
+        context['month_net_savings'] = month_net_savings
         context['prev_year'] = prev_month_date.year
         context['prev_month'] = prev_month_date.month
         context['next_year'] = next_month_date.year

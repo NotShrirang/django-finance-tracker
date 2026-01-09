@@ -24,6 +24,7 @@
                 </form>
             </div>
         </div>
+        <p class="text-muted small mb-0 mt-2 fst-italic">"A budget is telling your money where to go, instead of wondering where it went."</p>
         <p class="text-muted small mt-1">Overview of your spending vs. category limits for {{ month_name }} {{ current_year }}</p>
     </div>
 
@@ -112,6 +113,16 @@
                                     {% endif %}
                                 </span>
                             </div>
+                            
+                            {% if data.actual_percentage >= 100 %}
+                                <div class="mt-2 small text-danger">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Limit reached — consider adjusting
+                                </div>
+                            {% elif data.actual_percentage > 80 %}
+                                <div class="mt-2 small text-warning">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> You’re close to your limit
+                                </div>
+                            {% endif %}
                         {% else %}
                             <div class="alert alert-light py-2 px-3 mb-0 small border-0 bg-body-tertiary">
                                 <i class="bi bi-info-circle me-1"></i> No limit set
