@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.views import generic
@@ -55,6 +55,30 @@ import calendar
 # import openpyxl
 # import calendar
 # from datetime import datetime, date, timedelta
+
+def demo_login(request):
+    """
+    Logs in the read-only 'demo' user without password authentication.
+    """
+    # Clear any existing messages (e.g. from previous logout)
+    list(messages.get_messages(request))
+
+    try:
+        user = User.objects.get(username='demo')
+        # Manually set the backend to allow login without authentication
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        messages.success(request, "🚀 Welcome to Demo Mode! Feel free to explore the app.")
+        return redirect('home')
+    except User.DoesNotExist:
+        messages.error(request, "Demo user does not exist. Please run the setup command.")
+        return redirect('account_login')
+
+def demo_signup(request):
+    """
+    Logs out the demo user and redirects to the signup page.
+    """
+    logout(request)
+    return redirect('signup')
 
 # --------------------
 # Mixins
@@ -995,17 +1019,28 @@ def export_expenses(request):
     selected_months = [m for m in selected_months if m]
     selected_categories = [c for c in selected_categories if c]
 
+    # Date Range Logic (Precedence over Year/Month)
     if start_date or end_date:
         if start_date:
             expenses = expenses.filter(date__gte=start_date)
         if end_date:
             expenses = expenses.filter(date__lte=end_date)
     else:
-        if not request.GET and not (selected_years or selected_months):
+        # Check if any specific filter is active
+        has_active_filters = (
+            selected_years or 
+            selected_months or 
+            search_query
+        )
+        
+        # If no year/month/search filters, default to current month/year
+        if not has_active_filters:
             selected_years = [str(datetime.now().year)]
-
+            selected_months = [str(datetime.now().month)]
+        
         if selected_years:
             expenses = expenses.filter(date__year__in=selected_years)
+        
         if selected_months:
             expenses = expenses.filter(date__month__in=selected_months)
 
@@ -1436,3 +1471,20 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Profile updated successfully.")
         return super().form_valid(form)
+
+def demo_login(request):
+    """
+    Logs in the read-only 'demo' user without password authentication.
+    """
+    # Clear any existing messages (e.g. from previous logout)
+    list(messages.get_messages(request))
+
+    try:
+        user = User.objects.get(username='demo')
+        # Manually set the backend to allow login without authentication
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        messages.success(request, "🚀 Welcome to Demo Mode! Feel free to explore the app.")
+        return redirect('home')
+    except User.DoesNotExist:
+        messages.error(request, "Demo user not setup. Please contact admin.")
+        return redirect('account_login')

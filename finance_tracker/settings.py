@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'expenses.middleware.DemoReadOnlyMiddleware',
 ]
 
 ROOT_URLCONF = 'finance_tracker.urls'

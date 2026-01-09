@@ -222,6 +222,20 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+    {% if request.user.username == 'demo' %}
+    <div class="alert alert-warning text-center fw-bold m-0 rounded-0 py-2 small shadow-sm position-relative z-3 d-flex justify-content-center align-items-center gap-2" role="alert">
+        <span><i class="bi bi-exclamation-triangle-fill me-1"></i> DEMO MODE: Read-only access.</span>
+        <span class="opacity-50">|</span>
+        <a href="{% url 'demo_signup' %}" class="text-reset text-decoration-underline">Create Account</a>
+        <span class="opacity-50">|</span>
+        <form action="{% url 'account_logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link p-0 align-baseline text-reset text-decoration-underline fw-bold" style="font-size: inherit;">
+                Exit Demo
+            </button>
+        </form>
+    </div>
+    {% endif %}
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{% url 'home' %}">
