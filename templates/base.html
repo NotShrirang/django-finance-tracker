@@ -273,13 +273,42 @@
                             Income
                         </a>
                     </li>
+
                     <li class="nav-item">
                         <a href="{% url 'category-list' %}" id="nav-settings"
                             class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
                             Settings
                         </a>
                     </li>
-                    
+
+                    <!-- Vertical Divider (Desktop) -->
+                    <li class="nav-item d-none d-lg-flex align-items-center mx-2">
+                        <div class="vr h-50 my-auto text-body opacity-25"></div>
+                    </li>
+
+                    <!-- Desktop Action Buttons -->
+                    <li class="nav-item dropdown d-none d-lg-block ms-2">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="text-gradient-primary">Add</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'expense-create' %}?next={{ request.path }}">
+                                    <i class="bi bi-dash-circle text-danger me-2"></i> Add Expense
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'recurring-create' %}?next={{ request.path }}">
+                                    <i class="bi bi-arrow-repeat text-primary me-2"></i> Add Recurring
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'income-create' %}?next={{ request.path }}">
+                                    <i class="bi bi-plus-circle text-success me-2"></i> Add Income
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
                     <li class="nav-item">
                         <form action="{% url 'account_logout' %}" method="post" class="d-inline">
@@ -455,8 +484,8 @@
         })()
     </script>
     {% if user.is_authenticated %}
-    <!-- Floating Action Button -->
-    <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
+    <!-- Floating Action Button (Mobile Only) -->
+    <div class="position-fixed bottom-0 end-0 p-4 d-md-none" style="z-index: 1050;">
         <div class="dropdown">
             <button id="global-fab" class="btn btn-primary btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
                     style="width: 60px; height: 60px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">

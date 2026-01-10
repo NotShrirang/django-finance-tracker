@@ -54,7 +54,7 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-4">
-                            <a href="{% url 'recurring-edit' rt.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
+                            <a href="{% url 'recurring-edit' rt.pk %}?next={{ request.path }}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
                                 <i class="bi bi-pencil-square text-primary"></i>
                             </a>
                             <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn" 

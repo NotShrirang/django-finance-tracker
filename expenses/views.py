@@ -910,7 +910,8 @@ class ExpenseCreateView(LoginRequiredMixin, generic.TemplateView):
         
         initial_data = [{'date': datetime.now().date()} for _ in range(1)]
         formset = ExpenseFormSet(queryset=Expense.objects.none(), initial=initial_data, form_kwargs={'user': request.user})
-        return render(request, self.template_name, {'formset': formset})
+        next_url = request.GET.get('next', '')
+        return render(request, self.template_name, {'formset': formset, 'next_url': next_url})
 
     def post(self, request, *args, **kwargs):
         ExpenseFormSet = modelformset_factory(Expense, form=ExpenseForm, extra=1, can_delete=True)
@@ -921,6 +922,10 @@ class ExpenseCreateView(LoginRequiredMixin, generic.TemplateView):
                 for instance in instances:
                     instance.user = request.user
                     instance.save()
+                
+                next_url = request.POST.get('next') or request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
                 return redirect('expense-list')
             except IntegrityError:
                 messages.error(request, "This expense entry already exists.")
@@ -933,10 +938,21 @@ class ExpenseUpdateView(LoginRequiredMixin, generic.UpdateView):
     template_name = 'expenses/expense_form.html'
     success_url = reverse_lazy('expense-list')
 
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
 
     def form_valid(self, form):
         try:
@@ -996,6 +1012,17 @@ class CategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
     fields = ['name', 'limit']
     template_name = 'expenses/category_form.html'
     success_url = reverse_lazy('category-list')
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
@@ -1170,16 +1197,39 @@ class IncomeCreateView(LoginRequiredMixin, generic.CreateView):
             messages.error(self.request, "This income entry already exists.")
             return self.form_invalid(form)
 
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
+
+
 class IncomeUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Income
     form_class = IncomeForm
     template_name = 'expenses/income_form.html'
     success_url = reverse_lazy('income-list')
 
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
 
     def get_queryset(self):
         return Income.objects.filter(user=self.request.user)
@@ -1418,11 +1468,44 @@ class RecurringTransactionCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Recurring transaction created successfully.')
         return super().form_valid(form)
 
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
+
 class RecurringTransactionUpdateView(LoginRequiredMixin, UpdateView):
     model = RecurringTransaction
     form_class = RecurringTransactionForm
     template_name = 'expenses/recurring_transaction_form.html'
     success_url = reverse_lazy('recurring-list')
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = self.request.POST.get('next') or self.request.GET.get('next') or ''
+        return context
 
     def get_queryset(self):
         return RecurringTransaction.objects.filter(user=self.request.user)

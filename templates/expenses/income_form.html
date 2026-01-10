@@ -35,7 +35,9 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-lg me-1"></i> Save Income
                         </button>
-                        <a href="{% url 'income-list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        
+                        <input type="hidden" name="next" value="{{ next_url }}">
+                        <a href="{{ next_url|default:'/income/list/' }}" class="btn btn-outline-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

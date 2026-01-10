@@ -185,7 +185,7 @@
                         <td class="fw-bold">{{ expense.amount }}</td>
                         <td class="text-end pe-4 text-nowrap">
                             <div class="hstack gap-3 justify-content-end">
-                                <a href="{% url 'expense-edit' expense.pk %}" class="btn btn-sm btn-link text-decoration-none p-0 d-inline-flex align-items-center" title="Edit">
+                                <a href="{% url 'expense-edit' expense.pk %}?next={{ request.path }}" class="btn btn-sm btn-link text-decoration-none p-0 d-inline-flex align-items-center" title="Edit">
                                     <i class="bi bi-pencil-square text-primary"></i>
                                 </a>
                                 <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn d-inline-flex align-items-center" 

@@ -192,11 +192,15 @@ a:hover {
 }
 
 /* Navbar Links (Dark Blue on Light Background) */
+/* Navbar Links (Dark Blue on Light Background) */
 .nav-link {
     color: var(--color-primary);
+    font-weight: 400; /* Regular weight */
+    font-size: 1rem;  /* Consistent size */
 }
 .nav-link:hover, .nav-link.active {
     color: var(--color-success) !important;
+    font-weight: 500; /* Slightly heavier for active state */
 }
 
 /* Pagination */
@@ -235,6 +239,17 @@ a:hover {
 }
 .text-warning {
     color: var(--color-warning) !important;
+}
+
+/* Gradient Text Utility */
+/* Gradient Text Utility */
+.text-gradient-primary {
+    background: var(--primary-gradient) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block; /* Required for transform effects sometimes */
 }
 
 /* Dark Mode Overrides */

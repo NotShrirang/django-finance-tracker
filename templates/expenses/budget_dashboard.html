@@ -81,7 +81,12 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h5 class="h6 fw-bold mb-0">{{ data.category.name }}</h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="h6 fw-bold mb-0">{{ data.category.name }}</h5>
+                                    <a href="{% url 'category-edit' data.category.pk %}?next={{ request.path }}" class="text-secondary small text-decoration-none" title="Edit Limit" style="font-size: 0.9rem;">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </div>
                                 <small class="text-muted">Spent: {{ currency_symbol }}{{ data.spent|floatformat:0 }}</small>
                             </div>
                             {% if data.limit %}
