@@ -62,14 +62,17 @@ class IncomeForm(forms.ModelForm):
 class RecurringTransactionForm(forms.ModelForm):
     class Meta:
         model = RecurringTransaction
-        fields = ['transaction_type', 'amount', 'description', 'category', 'source', 'frequency', 'start_date', 'is_active']
+        fields = ['transaction_type', 'amount', 'category', 'source', 'frequency', 'start_date', 'description', 'is_active', 'payment_method']
         widgets = {
             'transaction_type': forms.Select(attrs={'class': 'form-select', 'onchange': 'toggleFields()'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'source': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Salary, Rent'}),
             'frequency': forms.Select(attrs={'class': 'form-select'}),
             'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'payment_method': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):

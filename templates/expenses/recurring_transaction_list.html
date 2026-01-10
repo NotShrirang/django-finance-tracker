@@ -30,7 +30,7 @@
                             <span class="fw-bold">{{ rt.description }}</span><br>
                             <small class="text-muted">
                                 {% if rt.transaction_type == 'EXPENSE' %}
-                                    Category: {{ rt.category }}
+                                    Category: {{ rt.category }} • {{ rt.payment_method }}
                                 {% else %}
                                     Source: {{ rt.source }}
                                 {% endif %}

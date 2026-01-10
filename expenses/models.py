@@ -102,6 +102,14 @@ class RecurringTransaction(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=255, blank=True, null=True) # For Expense
     source = models.CharField(max_length=255, blank=True, null=True)   # For Income
+    
+    # We can reuse the PAYMENT_OPTIONS from Expense, or duplicate them.
+    # Reusing is cleaner but requires referencing Expense.PAYMENT_OPTIONS or moving it to a constant.
+    # Given the context, I'll access it via Expense.PAYMENT_OPTIONS if possible, or just duplicate for safety/decoupling if cleaner.
+    # Let's duplicate to avoid circular dependency issues if models are rearranged, but actually they are in the same file.
+    # Accessing Expense.PAYMENT_OPTIONS is fine.
+    payment_method = models.CharField(max_length=50, choices=Expense.PAYMENT_OPTIONS, default='Cash')
+    
     frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES)
     start_date = models.DateField()
     last_processed_date = models.DateField(null=True, blank=True)

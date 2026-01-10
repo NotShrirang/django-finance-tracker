@@ -61,6 +61,13 @@
                         <div class="text-danger small">{{ form.source.errors|first }}</div>
                     {% endif %}
                 </div>
+                <div class="col-12" id="paymentMethodGroup">
+                    <label class="form-label">Payment Source Method</label>
+                    {{ form.payment_method }}
+                    {% if form.payment_method.errors %}
+                        <div class="text-danger small">{{ form.payment_method.errors|first }}</div>
+                    {% endif %}
+                </div>
                 <div class="col-12">
                     <label class="form-label">Description</label>
                     {{ form.description }}
@@ -93,12 +100,15 @@
         const typeSelect = document.querySelector('[name="transaction_type"]');
         const categoryGroup = document.getElementById('categoryGroup');
         const sourceGroup = document.getElementById('sourceGroup');
+        const paymentMethodGroup = document.getElementById('paymentMethodGroup');
 
         if (typeSelect.value === 'EXPENSE') {
             categoryGroup.style.display = 'block';
+            paymentMethodGroup.style.display = 'block';
             sourceGroup.style.display = 'none';
         } else {
             categoryGroup.style.display = 'none';
+            paymentMethodGroup.style.display = 'none';
             sourceGroup.style.display = 'block';
         }
     }

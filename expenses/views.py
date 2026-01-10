@@ -132,7 +132,10 @@ class RecurringTransactionMixin:
                         date=current_date,
                         amount=rt.amount,
                         category=rt.category or 'Uncategorized',
-                        defaults={'description': description}
+                        defaults={
+                            'description': description,
+                            'payment_method': rt.payment_method
+                        }
                     )
                 else:
                     Income.objects.get_or_create(
