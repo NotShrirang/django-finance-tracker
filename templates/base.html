@@ -450,7 +450,15 @@
             if (submitBtn && !e.defaultPrevented) {
                 // If it's a delete button, use "Deleting..."
                 const isDelete = submitBtn.classList.contains('btn-danger') || submitBtn.textContent.toLowerCase().includes('delete');
-                const loadingText = isDelete ? 'Deleting...' : 'Saving...';
+                const isLogin = submitBtn.textContent.toLowerCase().includes('sign in') || submitBtn.textContent.toLowerCase().includes('login');
+                
+                let loadingText = 'Saving';
+                if (isDelete) {
+                    loadingText = 'Deleting';
+                } else if (isLogin) {
+                    loadingText = 'Logging in';
+                }
+                
                 setButtonLoading(submitBtn, loadingText);
             }
         });
