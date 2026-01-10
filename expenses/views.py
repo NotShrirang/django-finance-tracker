@@ -968,6 +968,25 @@ class ExpenseUpdateView(LoginRequiredMixin, generic.UpdateView):
         # Ensure user can only edit their own expenses
         return Expense.objects.filter(user=self.request.user)
 
+class ExpenseBulkDeleteView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        expense_ids = request.POST.getlist('expense_ids')
+        if not expense_ids:
+            messages.error(request, 'No expenses selected for deletion.')
+            return redirect('expense-list')
+            
+        # Filter by IDs and ensuring they belong to the current user for security
+        expenses_to_delete = Expense.objects.filter(id__in=expense_ids, user=request.user)
+        deleted_count = expenses_to_delete.count()
+        
+        if deleted_count > 0:
+            expenses_to_delete.delete()
+            messages.success(request, f'{deleted_count} expenses deleted successfully.')
+        else:
+            messages.warning(request, 'No valid expenses found to delete.')
+            
+        return redirect('expense-list')
+
 class ExpenseDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Expense
     template_name = 'expenses/expense_confirm_delete.html'

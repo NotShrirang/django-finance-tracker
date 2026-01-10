@@ -413,6 +413,52 @@
         });
     </script>
 
+    <!-- Button Loader Utility -->
+    <script>
+        // Set button to loading state
+        window.setButtonLoading = function(button, text = 'Processing...') {
+            if (!button) return;
+            // Save original content
+            if (!button.getAttribute('data-original-content')) {
+                button.setAttribute('data-original-content', button.innerHTML);
+            }
+            // Create spinner
+            const spinner = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>';
+            
+            // If it's an icon-only button (empty or just whitespace text), don't add text
+            const hasText = button.textContent.trim().length > 0;
+            
+            // Set width to prevent jumping (optional, but good)
+            button.style.width = getComputedStyle(button).width;
+            
+            button.classList.add('disabled'); // Bootstrap disabled style
+            // For links, we can't use .disabled property effectively for click prevention in all cases, but CSS pointer-events helps
+            button.style.pointerEvents = 'none'; 
+            
+            if (hasText) {
+                button.innerHTML = spinner + text;
+            } else {
+                button.innerHTML = spinner;
+            }
+        };
+
+        // Global Form Submit Handler (covers Save & Delete buttons in forms)
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            // Find valid submit button (exclude disabled ones to avoid double triggering if logic exists)
+            const submitBtn = form.querySelector('button[type="submit"]:not(.no-loader)'); 
+            if (submitBtn && !e.defaultPrevented) {
+                // If it's a delete button, use "Deleting..."
+                const isDelete = submitBtn.classList.contains('btn-danger') || submitBtn.textContent.toLowerCase().includes('delete');
+                const loadingText = isDelete ? 'Deleting...' : 'Saving...';
+                setButtonLoading(submitBtn, loadingText);
+            }
+        });
+    </script>
+
+    <!-- Block for Modals -->
+    {% block modals %}{% endblock %}
+
     <!-- Global Loader Overlay -->
     <div id="page-loader" class="position-fixed top-0 start-0 w-100 h-100 d-none justify-content-center align-items-center" 
          style="background: rgba(255, 255, 255, 0.7); z-index: 9999; backdrop-filter: blur(2px);">
