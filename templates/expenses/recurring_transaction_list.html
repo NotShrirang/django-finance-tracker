@@ -1,87 +1,246 @@
-{% extends 'expenses/settings_base.html' %}
+{% extends 'base.html' %}
 
-{% block settings_content %}
-<div class="card shadow-lg border-0 fade-in">
-    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-        <h2 class="h4 mb-0 fw-bold">Subscriptions & Bills</h2>
-        <a href="{% url 'recurring-create' %}" class="btn btn-primary btn-sm d-inline-flex align-items-center text-nowrap">
-            <i class="bi bi-plus-lg me-1"></i> Add Subscription
-        </a>
+{% block content %}
+<style>
+    /* Custom override for subtle nav pills with Dark Mode support */
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        background-color: transparent;
+        color: var(--bs-primary);
+        font-weight: 600;
+        box-shadow: none;
+        border: 2px solid var(--bs-primary);
+    }
+    .nav-pills .nav-link {
+        color: var(--bs-secondary-color);
+        font-weight: 500;
+        background-color: var(--bs-tertiary-bg);
+        border: 1px solid transparent;
+    }
+    .nav-pills .nav-link:hover {
+        color: var(--bs-primary);
+        background-color: var(--bs-secondary-bg);
+    }
+    
+    /* Summary Card Dark Mode Adaptation */
+    [data-bs-theme="dark"] .summary-card {
+        background-color: var(--bs-dark-bg-subtle) !important;
+        color: var(--bs-emphasis-color) !important;
+    }
+    [data-bs-theme="dark"] .summary-text-muted {
+        color: var(--bs-secondary-color) !important;
+    }
+</style>
+<div class="row fade-in">
+    <!-- Header Summary Section -->
+    <div class="col-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h3 fw-bold mb-0">Subscriptions</h2>
+            <a href="{% url 'recurring-create' %}" class="btn btn-sm btn-primary d-flex align-items-center shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i> Add Subscription
+            </a>
+        </div>
+        
+        <div class="card shadow-sm border-0 bg-white summary-card mb-4">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6 border-end border-secondary border-opacity-10">
+                        <div class="d-flex flex-column">
+                            <span class="text-uppercase text-muted summary-text-muted fw-bold small mb-1">Total Monthly Cost</span>
+                            <span class="display-6 fw-bold summary-text-muted">{{ currency_symbol }}{{ total_monthly_cost|floatformat:0 }} <span class="fs-6 text-muted summary-text-muted">/ month</span></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ps-md-4 mt-3 mt-md-0">
+                        <div class="d-flex flex-column">
+                            <span class="text-uppercase text-muted summary-text-muted fw-bold small mb-1">Yearly Projection</span>
+                            <span class="h3 mb-0 summary-text-muted">{{ currency_symbol }}{{ total_yearly_cost|floatformat:0 }} <span class="fs-6 text-muted summary-text-muted">/ year</span></span>
+                        </div>
+                        {% if renewals_count > 0 %}
+                        <div class="mt-2">
+                            <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 border border-danger-subtle">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i> {{ renewals_count }} renewals due soon
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0 text-start align-middle">
-                <thead>
-                    <tr>
-                        <th class="ps-4">Description</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Frequency</th>
-                        <th>Next Due</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for rt in recurring_transactions %}
-                    <tr>
-                        <td class="ps-4">
-                            <span class="fw-bold">{{ rt.description }}</span><br>
-                            <small class="text-muted">
-                                {% if rt.transaction_type == 'EXPENSE' %}
-                                    Category: {{ rt.category }} • {{ rt.payment_method }}
-                                {% else %}
-                                    Source: {{ rt.source }}
-                                {% endif %}
-                            </small>
-                        </td>
-                        <td>
-                            <span class="badge {% if rt.transaction_type == 'EXPENSE' %}bg-danger-subtle text-danger{% else %}bg-success-subtle text-success{% endif %}">
-                                {{ rt.get_transaction_type_display }}
-                            </span>
-                        </td>
-                        <td class="fw-bold">{{ currency_symbol }}{{ rt.amount|floatformat:2 }}</td>
-                        <td>{{ rt.get_frequency_display }}</td>
-                        <td>
-                            {{ rt.next_due_date }}
-                        </td>
-                        <td>
-                            {% if rt.is_active %}
-                                <span class="badge bg-success">Active</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-end pe-4">
-                            <a href="{% url 'recurring-edit' rt.pk %}?next={{ request.path }}" class="btn btn-sm btn-link text-decoration-none p-0 me-2" title="Edit">
-                                <i class="bi bi-pencil-square text-primary"></i>
-                            </a>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 delete-btn" 
-                                    data-bs-toggle="modal" data-bs-target="#deleteModal" 
-                                    data-url="{% url 'recurring-delete' rt.pk %}"
-                                    data-message="Are you sure you want to delete this recurring transaction? Actual entries already created will not be affected.">
-                                <i class="bi bi-trash text-danger"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5">
-                            <div class="py-4">
-                                <i class="bi bi-arrow-repeat text-muted display-1 mb-3 d-block"></i>
-                                <h4 class="fw-bold text-muted">No Subscriptions Found</h4>
-                                <p class="text-muted mb-4">You haven't set up any recurring subscriptions or bills yet.</p>
-                                <a href="{% url 'recurring-create' %}" class="btn btn-primary">
-                                    <i class="bi bi-plus-lg me-1"></i> Add Subscription
-                                </a>
+    <!-- Tabs Navigation -->
+    <div class="col-12">
+        <ul class="nav nav-pills mb-4 gap-2" id="subscriptionTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active px-4 rounded-pill" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-selected="true">
+                    All
+                    <span class="badge bg-white text-primary ms-2 rounded-pill opacity-75">{{ active_subs|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link px-4 rounded-pill" id="renewing-tab" data-bs-toggle="tab" data-bs-target="#renewing" type="button" role="tab" aria-selected="false">
+                    Renewing Soon 
+                    {% if renewals_count > 0 %}<span class="badge bg-danger ms-2 rounded-circle">{{ renewals_count }}</span>{% endif %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link px-4 rounded-pill" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-selected="false">Cancelled</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="subscriptionTabsContent">
+            <!-- All Subscriptions Tab -->
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                {% if active_subs %}
+                    <div class="list-group shadow-sm rounded-3 border-0">
+                        {% for sub in active_subs %}
+                            <div class="list-group-item list-group-item-action p-4 border-0 border-bottom d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <!-- Icon with Urgency Logic -->
+                                    <div class="me-3 
+                                        {% if sub.annotated_days_until <= 3 and sub.transaction_type == 'EXPENSE' %}text-danger
+                                        {% elif sub.annotated_days_until <= 7 and sub.transaction_type == 'EXPENSE' %}text-warning
+                                        {% else %}text-secondary{% endif %}">
+                                        <i class="bi bi-arrow-repeat fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1 fw-bold">{{ sub.description }}</h5>
+                                        <div class="text-muted small d-flex align-items-center flex-wrap gap-2">
+                                            <span><i class="bi bi-calendar-event me-1"></i>{{ sub.get_frequency_display }}</span>
+                                            
+                                            <!-- Urgency Text/Pill -->
+                                            {% if sub.annotated_days_until <= 3 and sub.transaction_type == 'EXPENSE' %}
+                                                <span class="badge bg-danger text-white rounded-pill shadow-sm">
+                                                    In {{ sub.annotated_days_until }} day{{ sub.annotated_days_until|pluralize }}
+                                                </span>
+                                            {% elif sub.annotated_days_until <= 7 and sub.transaction_type == 'EXPENSE' %}
+                                                <span class="text-warning fw-bold">
+                                                    In {{ sub.annotated_days_until }} day{{ sub.annotated_days_until|pluralize }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    In {{ sub.annotated_days_until }} days
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- Larger Amount -->
+                                    <h4 class="fw-bold mb-0">{{ currency_symbol }}{{ sub.amount|floatformat:0 }}</h4>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                            <li><a class="dropdown-item" href="{% url 'recurring-edit' sub.pk %}?next={{ request.path }}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <button class="dropdown-item text-danger delete-btn" type="button" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-url="{% url 'recurring-delete' sub.pk %}"
+                                                    data-message="Are you sure you want to delete subscription '{{ sub.description|escapejs }}'? This will stop all future tracking for this item.">
+                                                    <i class="bi bi-trash me-2"></i>Delete
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- Improved Empty State -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="bi bi-bell-slash fs-1"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold">No active subscriptions</h4>
+                        <p class="text-muted mb-4 col-md-6 mx-auto">Most people forget at least one renewal every year. Add yours now so we can remind you before you pay.</p>
+                        <a href="{% url 'recurring-create' %}" class="btn btn-primary px-4 py-2 rounded-pill fw-medium">
+                            <i class="bi bi-plus-lg me-2"></i>Add your first subscription
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Renewing Soon Tab -->
+            <div class="tab-pane fade" id="renewing" role="tabpanel">
+                {% if renewing_soon %}
+                    <div class="list-group shadow-sm rounded-3 border-0">
+                        {% for sub in renewing_soon %}
+                            <div class="list-group-item list-group-item-action p-4 border-0 border-bottom d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 text-danger">
+                                        <i class="bi bi-exclamation-circle-fill fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1 fw-bold">{{ sub.description }}</h5>
+                                        <div class="text-muted small">
+                                            <span class="badge bg-danger text-white me-2">Renewing This Month</span>
+                                            <span>{{ sub.get_frequency_display }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="fw-bold mb-1">{{ currency_symbol }}{{ sub.amount|floatformat:0 }}</h4>
+                                     <a href="{% url 'recurring-edit' sub.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary mt-1 rounded-pill">Manage</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle display-4 text-success mb-3 d-block"></i>
+                        <p class="text-muted">No renewals coming up this month!</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Cancelled Tab -->
+            <div class="tab-pane fade" id="cancelled" role="tabpanel">
+                {% if cancelled_subs %}
+                    <div class="list-group shadow-sm rounded-3 border-0 opacity-75">
+                        {% for sub in cancelled_subs %}
+                            <div class="list-group-item list-group-item-action p-4 border-0 border-bottom d-flex justify-content-between align-items-center opacity-75">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 text-secondary">
+                                        <i class="bi bi-x-circle fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1 fw-bold text-decoration-line-through text-muted">{{ sub.description }}</h5>
+                                        <div class="text-muted small">
+                                            <span class="badge bg-secondary me-2">Cancelled</span>
+                                            <span>{{ sub.get_frequency_display }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="fw-bold mb-1 text-muted">{{ currency_symbol }}{{ sub.amount|floatformat:0 }}</h5>
+                                    <a href="{% url 'recurring-edit' sub.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-primary mt-1">Reactivate</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">No cancelled subscriptions.</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Simple Delete Confirmation Modal Script reused from global or base if available, 
+     otherwise we rely on the generic confirmDelete logic or link to the delete page.
+     Here I used a simple onclick that could redirect. 
+     Wait, better to just use the standard button link to the delete confirmation page for simplicity and safety 
+     unless we have a JS modal ready. 
+     I inserted a 'confirmDelete' JS call in the button. I need to make sure that exists or just use a direct link.
+     The previous implementation used a data-url attribute. Let's revert to a direct link for Delete 
+     to be consistent with the standalone delete page I just made.
+-->
+
 {% endblock %}

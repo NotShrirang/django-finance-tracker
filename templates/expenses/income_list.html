@@ -1,9 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'expenses/settings_base.html' %}
 
-{% block content %}
-<div class="card shadow-lg border-0 fade-in">
+{% block settings_content %}
     <!-- Mobile Header -->
-    <div class="card-header bg-transparent d-md-none py-3">
+    <div class="d-md-none py-3 mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="h4 mb-0 fw-bold">Income</h2>
             <div class="d-flex align-items-center gap-3">
@@ -19,7 +18,7 @@
     </div>
 
     <!-- Desktop Header -->
-    <div class="card-header bg-transparent d-none d-md-block py-3">
+    <div class="d-none d-md-block py-3 mb-4">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="h4 mb-0 fw-bold">Income</h2>
             <div class="d-flex gap-2">
@@ -35,7 +34,7 @@
 
     <!-- Collapsible Filter Form -->
     <div class="collapse d-md-block" id="incomeFilters">
-        <form method="get" class="mb-4 bg-body-tertiary p-3 rounded shadow-sm">
+        <form method="get" class="mb-4 bg-body-tertiary p-3 rounded shadow-sm border-0">
             <div class="row g-3 align-items-end">
                 <div class="col-6 col-md-3">
                     <label for="date_from" class="form-label small text-muted">Date From</label>
@@ -62,7 +61,7 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="px-3 mb-3 mt-3 mt-md-0">
+    <div class="mb-3 mt-3 mt-md-0">
         <div class="row g-2">
             <div class="col-6 col-md-auto">
                 <div class="p-2 border rounded bg-body-tertiary shadow-sm text-center text-md-start">
@@ -80,6 +79,7 @@
     </div>
 
     <!-- List -->
+    <div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover table-striped mb-0 text-start align-middle">
@@ -146,10 +146,11 @@
             </table>
         </div>
     </div>
+    </div>
     
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="card-footer bg-transparent py-3">
+    <div class="py-3">
         <nav>
             <ul class="pagination justify-content-center mb-0">
                 {% if page_obj.has_previous %}
@@ -179,5 +180,4 @@
         </nav>
     </div>
     {% endif %}
-</div>
 {% endblock %}

@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'expenses/settings_base.html' %}
 
-{% block content %}
-<div class="row fade-in">
-    <div class="col-12 mb-4">
+{% block settings_content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="py-3 mb-4">
         <div class="d-flex justify-content-between align-items-center">
-            <h2 class="h3 fw-bold mb-0">Budget Dashboard</h2>
+            <h2 class="h4 mb-0 fw-bold">Budget</h2>
             <div class="d-flex gap-2">
                 <form method="get" class="d-flex gap-2 align-items-center">
                     <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
@@ -24,56 +25,55 @@
                 </form>
             </div>
         </div>
-        <p class="text-muted small mb-0 mt-2 fst-italic">"A budget is telling your money where to go, instead of wondering where it went."</p>
-        <p class="text-muted small mt-1">Overview of your spending vs. category limits for {{ month_name }} {{ current_year }}</p>
+        <p class="text-muted small mb-0 mt-1">"A budget is telling your money where to go, instead of wondering where it went."</p>
     </div>
 
-    <!-- Overall Summary -->
-    <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-4">
-                        <h4 class="h6 text-muted text-uppercase fw-bold mb-1">Total Budget Goal</h4>
-                        <div class="d-flex align-items-center mb-0">
-                            <p class="h3 fw-bold mb-0">{{ currency_symbol }}{{ total_spent|floatformat:2 }}</p>
-                            {% if spent_mom_pct is not None %}
-                                <span class="badge rounded-pill {% if spent_mom_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.8rem;" title="vs last month">
-                                    <i class="bi bi-arrow-{% if spent_mom_pct > 0 %}up{% else %}down{% endif %}"></i>
-                                    {{ spent_mom_pct_abs|floatformat:1 }}%
-                                </span>
-                            {% endif %}
-                        </div>
-                        <span class="text-muted h5">/ {{ currency_symbol }}{{ total_budget|floatformat:2 }}</span>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="progress" style="height: 12px; border-radius: 6px;">
-                            <div class="progress-bar {% if total_percentage > 100 %}bg-danger{% elif total_percentage > 85 %}bg-warning{% else %}bg-success{% endif %}" 
-                                 role="progressbar" 
-                                 style="width: {{ total_percentage }}%" 
-                                 aria-valuenow="{{ total_percentage }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <span class="small text-muted">{{ total_percentage|floatformat:1 }}% Used</span>
-                            <span class="small {% if total_spent > total_budget %}text-danger fw-bold{% else %}text-muted{% endif %}">
-                                {% if total_spent > total_budget %}
-                                    Over budget by {{ currency_symbol }}{{ over_budget_amount|floatformat:2 }}
-                                {% else %}
-                                    {{ currency_symbol }}{{ total_remaining|floatformat:2 }} remaining
+    <div>
+        <!-- Overall Summary -->
+        <div class="mb-4">
+            <div class="card shadow-sm border-0 bg-body-tertiary">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h4 class="h6 text-muted text-uppercase fw-bold mb-1">Total Budget Goal</h4>
+                            <div class="d-flex align-items-center mb-0">
+                                <p class="h3 fw-bold mb-0">{{ currency_symbol }}{{ total_spent|floatformat:2 }}</p>
+                                {% if spent_mom_pct is not None %}
+                                    <span class="badge rounded-pill {% if spent_mom_pct > 0 %}bg-danger{% else %}bg-success{% endif %} ms-2" style="font-size: 0.8rem;" title="vs last month">
+                                        <i class="bi bi-arrow-{% if spent_mom_pct > 0 %}up{% else %}down{% endif %}"></i>
+                                        {{ spent_mom_pct_abs|floatformat:1 }}%
+                                    </span>
                                 {% endif %}
-                            </span>
+                            </div>
+                            <span class="text-muted h5">/ {{ currency_symbol }}{{ total_budget|floatformat:2 }}</span>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="progress" style="height: 12px; border-radius: 6px;">
+                                <div class="progress-bar {% if total_percentage > 100 %}bg-danger{% elif total_percentage > 85 %}bg-warning{% else %}bg-success{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ total_percentage }}%" 
+                                     aria-valuenow="{{ total_percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="small text-muted">{{ total_percentage|floatformat:1 }}% Used</span>
+                                <span class="small {% if total_spent > total_budget %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                    {% if total_spent > total_budget %}
+                                        Over budget by {{ currency_symbol }}{{ over_budget_amount|floatformat:2 }}
+                                    {% else %}
+                                        {{ currency_symbol }}{{ total_remaining|floatformat:2 }} remaining
+                                    {% endif %}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Category Breakdown -->
-    <div class="col-12">
+        <!-- Category Breakdown -->
         <div class="row g-4">
             {% for data in budget_data %}
             <div class="col-md-6 col-lg-4">

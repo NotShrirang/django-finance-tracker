@@ -1,11 +1,11 @@
 {% extends 'expenses/settings_base.html' %}
 
 {% block settings_content %}
-<div class="card shadow-lg border-0 fade-in">
-    <div class="card-header bg-transparent py-3">
+<div class="fade-in">
+    <div class="py-3 mb-3">
         <h2 class="h4 mb-0 fw-bold">Upload Expenses</h2>
     </div>
-    <div class="card-body">
+    <div>
         <p class="text-muted mb-4 small">
             Upload your Excel file to update your expense records. Each sheet corresponds to a month.
         </p>
@@ -48,7 +48,7 @@
             </button>
         </form>
     </div>
-    <div class="card-footer bg-transparent text-muted small py-3">
+    <div class="text-muted small py-3 mt-3">
         Supported formats: .xlsx, .xls
     </div>
 </div>

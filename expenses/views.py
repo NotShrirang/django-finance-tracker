@@ -165,6 +165,9 @@ class LandingPageView(TemplateView):
             return redirect('home')
         return super().dispatch(request, *args, **kwargs)
 
+class SettingsHomeView(LoginRequiredMixin, TemplateView):
+    template_name = 'expenses/settings_home.html'
+
 @login_required
 def home_view(request):
     """
@@ -1474,6 +1477,123 @@ class RecurringTransactionListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return RecurringTransaction.objects.filter(user=self.request.user).order_by('-created_at')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        all_transactions = self.object_list
+        today = date.today()
+        
+        # Split into Active and Cancelled
+        active_subs = [t for t in all_transactions if t.is_active]
+        cancelled_subs = [t for t in all_transactions if not t.is_active]
+        
+        # Calculate Totals (Monthly & Yearly)
+        total_monthly = 0
+        total_yearly = 0
+        
+        for sub in active_subs:
+            amount = sub.amount
+            if sub.frequency == 'DAILY':
+                total_monthly += amount * 30
+                total_yearly += amount * 365
+            elif sub.frequency == 'WEEKLY':
+                total_monthly += amount * 4
+                total_yearly += amount * 52
+            elif sub.frequency == 'MONTHLY':
+                total_monthly += amount
+                total_yearly += amount * 12
+            elif sub.frequency == 'YEARLY':
+                total_monthly += amount / 12
+                total_yearly += amount
+
+        # Identify "Renewing Soon" (This Month)
+        renewing_soon = []
+        renewals_count = 0
+        
+        # Helper to find next date relative to today
+        for sub in active_subs:
+            # Calculate next occurrence
+            next_date = sub.start_date
+            
+            # For simpler logic, we reset the year/month to current to check basic interval
+            # But for accurate "days until", we need better logic:
+            
+            if sub.frequency == 'DAILY':
+                next_date = today + timedelta(days=1)
+            elif sub.frequency == 'WEEKLY':
+                # Find days ahead
+                days_ahead = (sub.start_date.weekday() - today.weekday()) % 7
+                if days_ahead == 0 and today > sub.start_date: # if today is the day, but older start
+                     days_ahead = 7
+                elif days_ahead == 0 and today == sub.start_date: # exact match today
+                     days_ahead = 0
+                else: 
+                     # If start_date was future, we wait. If past, we find next.
+                     # Simplified: just next occurrence of that weekday
+                     if days_ahead <= 0: days_ahead += 7
+                
+                # Correction: Standard logic to find next matching weekday
+                days_ahead = (sub.start_date.weekday() - today.weekday()) 
+                if days_ahead <= 0: # Target day already happened this week or is today
+                    days_ahead += 7
+                next_date = today + timedelta(days=days_ahead)
+                
+            elif sub.frequency == 'MONTHLY':
+                # Occurs on sub.start_date.day every month
+                # If today.day > start_date.day, it's next month.
+                # If today.day <= start_date.day, it's this month.
+                try:
+                    if today.day > sub.start_date.day:
+                        # Next month
+                        month = today.month + 1
+                        year = today.year
+                        if month > 12:
+                            month = 1
+                            year += 1
+                        next_date = date(year, month, sub.start_date.day)
+                    else:
+                        # This month
+                        next_date = date(today.year, today.month, sub.start_date.day)
+                except ValueError: 
+                    # Handle end of month issues (e.g. 31st) - simplified to 1st of next-next month
+                    next_date = (today.replace(day=1) + timedelta(days=32)).replace(day=1)
+
+            elif sub.frequency == 'YEARLY':
+                try:
+                    this_year_date = date(today.year, sub.start_date.month, sub.start_date.day)
+                    if today > this_year_date:
+                        next_date = date(today.year + 1, sub.start_date.month, sub.start_date.day)
+                    else:
+                        next_date = this_year_date
+                except ValueError:
+                    next_date = date(today.year, 2, 28)
+
+            # Annotate object
+            sub.annotated_next_date = next_date
+            sub.annotated_days_until = (next_date - today).days
+            
+            # Determine urgency
+            is_renewing = False
+            if sub.transaction_type == 'EXPENSE':
+                if sub.annotated_days_until <= 30: # Show mostly anything coming up soon
+                     is_renewing = True
+            
+            if is_renewing:
+                renewing_soon.append(sub)
+                renewals_count += 1
+            
+            # Sort renewing soon by days until
+            renewing_soon.sort(key=lambda x: x.annotated_days_until)
+
+        context.update({
+            'active_subs': active_subs,
+            'cancelled_subs': cancelled_subs,
+            'renewing_soon': renewing_soon,
+            'renewals_count': renewals_count,
+            'total_monthly_cost': total_monthly,
+            'total_yearly_cost': total_yearly,
+        })
+        return context
+
 class RecurringTransactionCreateView(LoginRequiredMixin, CreateView):
     model = RecurringTransaction
     form_class = RecurringTransactionForm
@@ -1538,7 +1658,33 @@ class RecurringTransactionUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, 'Recurring transaction updated successfully.')
+        # Check if is_active changed from True to False
+        if 'is_active' in form.changed_data and not form.cleaned_data['is_active']:
+            # Cancellation detected
+            obj = self.get_object() # get current object
+            # Calculate yearly saving
+            amount = obj.amount
+            if obj.frequency == 'DAILY':
+                yearly_saving = amount * 365
+            elif obj.frequency == 'WEEKLY':
+                yearly_saving = amount * 52
+            elif obj.frequency == 'MONTHLY':
+                yearly_saving = amount * 12
+            else: # YEARLY
+                yearly_saving = amount
+            
+            # Assuming currency symbol is available in request or we use generic. 
+            # We can use the profile currency if available, or just a generic prompt. 
+            # User request used '₹', but code uses {{ currency_symbol }} in template.
+            # We'll try to fetch user currency or default.
+            currency = '₹'
+            if hasattr(self.request.user, 'userprofile'):
+                currency = self.request.user.userprofile.currency
+                
+            messages.success(self.request, f"You just saved {currency}{yearly_saving:,.0f}/year 🎉")
+        else:
+            messages.success(self.request, 'Recurring transaction updated successfully.')
+            
         return super().form_valid(form)
 
 class RecurringTransactionDeleteView(LoginRequiredMixin, DeleteView):
@@ -1550,7 +1696,24 @@ class RecurringTransactionDeleteView(LoginRequiredMixin, DeleteView):
         return RecurringTransaction.objects.filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, 'Recurring transaction deleted successfully.')
+        obj = self.get_object()
+        
+        # Calculate savings
+        amount = obj.amount
+        if obj.frequency == 'DAILY':
+            yearly_saving = amount * 365
+        elif obj.frequency == 'WEEKLY':
+            yearly_saving = amount * 52
+        elif obj.frequency == 'MONTHLY':
+            yearly_saving = amount * 12
+        else: # YEARLY
+            yearly_saving = amount
+            
+        currency = '₹'
+        if hasattr(self.request.user, 'userprofile'):
+            currency = self.request.user.userprofile.currency
+            
+        messages.success(self.request, f"You just saved {currency}{yearly_saving:,.0f}/year 🎉")
         return super().delete(request, *args, **kwargs)
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):

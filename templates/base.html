@@ -254,8 +254,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'budget' %}" class="nav-link {% if request.resolver_match.url_name == 'budget' %}active{% endif %}">
-                            Budget
+                        <a href="{% url 'expense-list' %}" id="nav-expenses" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
+                            Expenses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'recurring-list' %}" class="nav-link {% if 'recurring' in request.resolver_match.url_name %}active{% endif %}">
+                            Subscriptions
                         </a>
                     </li>
                     <li class="nav-item">
@@ -264,19 +269,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'expense-list' %}" id="nav-expenses" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
-                            Expenses
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'income-list' %}" class="nav-link {% if 'income' in request.resolver_match.url_name %}active{% endif %}">
-                            Income
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="{% url 'category-list' %}" id="nav-settings"
-                            class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'settings-home' %}" id="nav-settings"
+                            class="nav-link {% if 'category' in request.resolver_match.url_name or 'profile' in request.resolver_match.url_name or 'currency' in request.resolver_match.url_name or 'upload' in request.resolver_match.url_name or 'income' in request.resolver_match.url_name or 'budget' in request.resolver_match.url_name or 'settings' in request.resolver_match.url_name %}active{% endif %}">
                             Settings
                         </a>
                     </li>

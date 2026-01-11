@@ -1,6 +1,8 @@
-{% extends 'expenses/settings_base.html' %}
+{% extends 'base.html' %}
 
-{% block settings_content %}
+{% block content %}
+<div class="row justify-content-center fade-in">
+    <div class="col-md-8">
 <div class="card shadow-lg border-0 fade-in">
     <div class="card-header bg-transparent py-3">
         <h2 class="h4 mb-0 fw-bold">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Subscription</h2>
@@ -116,4 +118,6 @@
     // Run on load
     document.addEventListener('DOMContentLoaded', toggleFields);
 </script>
+    </div>
+</div>
 {% endblock %}
