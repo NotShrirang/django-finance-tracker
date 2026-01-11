@@ -3,9 +3,9 @@
 {% block settings_content %}
 <div class="card shadow-lg border-0 fade-in">
     <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-        <h2 class="h4 mb-0 fw-bold">Recurring Transactions</h2>
+        <h2 class="h4 mb-0 fw-bold">Subscriptions & Bills</h2>
         <a href="{% url 'recurring-create' %}" class="btn btn-primary btn-sm d-inline-flex align-items-center text-nowrap">
-            <i class="bi bi-plus-lg me-1"></i> Add Recurring
+            <i class="bi bi-plus-lg me-1"></i> Add Subscription
         </a>
     </div>
 
@@ -70,10 +70,10 @@
                         <td colspan="7" class="text-center py-5">
                             <div class="py-4">
                                 <i class="bi bi-arrow-repeat text-muted display-1 mb-3 d-block"></i>
-                                <h4 class="fw-bold text-muted">No Recurring Transactions</h4>
-                                <p class="text-muted mb-4">Set up automated entries for your regular bills and income.</p>
+                                <h4 class="fw-bold text-muted">No Subscriptions Found</h4>
+                                <p class="text-muted mb-4">You haven't set up any recurring subscriptions or bills yet.</p>
                                 <a href="{% url 'recurring-create' %}" class="btn btn-primary">
-                                    <i class="bi bi-plus-lg me-1"></i> Add Recurring
+                                    <i class="bi bi-plus-lg me-1"></i> Add Subscription
                                 </a>
                             </div>
                         </td>
