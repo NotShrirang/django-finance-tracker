@@ -465,6 +465,17 @@
             }
         });
     </script>
+    <script>
+        // Reset buttons on page show (bfcache restoration)
+        window.addEventListener('pageshow', function(event) {
+            // Restore all buttons that were put into loading state
+            document.querySelectorAll('button[data-original-content]').forEach(function(btn) {
+                btn.innerHTML = btn.getAttribute('data-original-content');
+                btn.classList.remove('disabled');
+                btn.style.pointerEvents = '';
+            });
+        });
+    </script>
 
     <!-- Block for Modals -->
     {% block modals %}{% endblock %}
