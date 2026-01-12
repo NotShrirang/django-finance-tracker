@@ -212,3 +212,14 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 # Default to a safe placeholder if env var is missing to avoid ValueError
 DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'noreply@yourdomain.com')
+
+# Trust the "X-Forwarded-Proto" header coming from Render
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Force SSL
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Ensure Allauth builds HTTPS links
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
