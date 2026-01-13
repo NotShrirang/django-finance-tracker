@@ -166,5 +166,70 @@ class UserProfile(models.Model):
     currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES, default='₹')
     has_seen_tutorial = models.BooleanField(default=False)
 
+    # Subscription Fields
+    TIER_CHOICES = [
+        ('FREE', 'Free'),
+        ('PLUS', 'Plus'),
+        ('PRO', 'Pro'),
+    ]
+    tier = models.CharField(max_length=10, choices=TIER_CHOICES, default='FREE')
+    subscription_end_date = models.DateTimeField(null=True, blank=True)
+    is_lifetime = models.BooleanField(default=False)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+
+    @property
+    def is_pro(self):
+        """Check if user has active Pro access (either lifetime or valid subscription)."""
+        # TEMPORARY: Unlock all features for free
+        return True
+        # from django.utils import timezone
+        # if self.tier == 'PRO':
+        #     if self.is_lifetime:
+        #         return True
+        #     if self.subscription_end_date and self.subscription_end_date > timezone.now():
+        #         return True
+        # return False
+    
+    @property
+    def is_plus(self):
+        """Check if user has active Plus access (or higher)."""
+        # TEMPORARY: Unlock all features for free
+        return True
+        # from django.utils import timezone
+        # if self.tier in ['PLUS', 'PRO']:
+        #     if self.is_lifetime:
+        #         return True
+        #     if self.subscription_end_date and self.subscription_end_date > timezone.now():
+        #         return True
+        # return False
+
     def __str__(self):
-        return f"{self.user.username}'s Profile"
+        return f"{self.user.username}'s Profile ({self.tier})"
+
+class PaymentHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    order_id = models.CharField(max_length=100)
+    payment_id = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    tier = models.CharField(max_length=10) # PLUS, PRO
+    status = models.CharField(max_length=20, default='PENDING') # PENDING, SUCCESS, FAILED
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.tier} - {self.status}"
+
+class SubscriptionPlan(models.Model):
+    TIER_CHOICES = [
+        ('PLUS', 'Plus'),
+        ('PRO', 'Pro'),
+    ]
+    tier = models.CharField(max_length=10, choices=TIER_CHOICES, unique=True)
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in INR")
+    features = models.TextField(help_text="Comma separated features", blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - ₹{self.price}"

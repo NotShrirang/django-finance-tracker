@@ -27,3 +27,25 @@ class RecurringTransactionAdmin(admin.ModelAdmin):
     list_display = ('description', 'transaction_type', 'amount', 'frequency', 'next_due_date', 'user', 'is_active')
     list_filter = ('transaction_type', 'frequency', 'is_active', 'user')
     search_fields = ('description',)
+
+from .models import UserProfile, PaymentHistory
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'tier', 'subscription_end_date', 'is_lifetime', 'is_pro')
+    list_filter = ('tier', 'is_lifetime')
+    search_fields = ('user__username', 'user__email')
+    
+@admin.register(PaymentHistory)
+class PaymentHistoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'tier', 'status', 'created_at')
+    list_filter = ('status', 'tier')
+    search_fields = ('user__username', 'order_id', 'payment_id')
+
+from .models import SubscriptionPlan
+
+@admin.register(SubscriptionPlan)
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'tier', 'price', 'is_active')
+    list_editable = ('price', 'is_active')
+    ordering = ('price',)

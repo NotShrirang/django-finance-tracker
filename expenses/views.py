@@ -35,7 +35,18 @@ def create_category_ajax(request):
             
             if not name:
                 return JsonResponse({'success': False, 'error': 'Category name cannot be empty.'}, status=400)
-                
+            
+            # Check Limits
+            current_count = Category.objects.filter(user=request.user).count()
+            limit = 5 # Free
+            if request.user.profile.is_plus:
+                limit = 10
+            if request.user.profile.is_pro:
+                limit = float('inf')
+
+            if current_count >= limit:
+                 return JsonResponse({'success': False, 'error': f'Category limit reached ({limit}). Please upgrade.'}, status=403)
+
             category = Category.objects.create(user=request.user, name=name)
             return JsonResponse({'success': True, 'id': category.id, 'name': category.name})
             
@@ -45,7 +56,7 @@ def create_category_ajax(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
             
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
-from .models import Expense, Category, Income, RecurringTransaction, UserProfile
+from .models import Expense, Category, Income, RecurringTransaction, UserProfile, SubscriptionPlan
 from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
 import openpyxl
 import calendar
@@ -164,6 +175,12 @@ class LandingPageView(TemplateView):
         if request.user.is_authenticated:
             return redirect('home')
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        plans = SubscriptionPlan.objects.filter(is_active=True)
+        context['plans'] = {p.tier: p for p in plans}
+        return context
 
 class SettingsHomeView(LoginRequiredMixin, TemplateView):
     template_name = 'expenses/settings_home.html'
@@ -1080,6 +1097,11 @@ def export_expenses(request):
     """
     Export expenses to CSV based on current filters.
     """
+    # Check Limits
+    if not request.user.profile.is_plus:
+        messages.error(request, "Export is available on Plus and Pro plans.")
+        return redirect('pricing')
+
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
 
     # Filter Logic
@@ -1630,6 +1652,18 @@ class RecurringTransactionCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
+        # Check Limits
+        current_count = RecurringTransaction.objects.filter(user=self.request.user, is_active=True).count()
+        limit = 0 # Free
+        if self.request.user.profile.is_plus:
+            limit = 3
+        if self.request.user.profile.is_pro:
+            limit = float('inf')
+
+        if current_count >= limit:
+             messages.error(self.request, f"Recurring Transaction limit reached ({limit}). Please upgrade.")
+             return redirect('pricing')
+             
         form.instance.user = self.request.user
         messages.success(self.request, 'Recurring transaction created successfully.')
         return super().form_valid(form)
@@ -1807,6 +1841,14 @@ def demo_login(request):
 
 class PricingView(TemplateView):
     template_name = 'expenses/pricing.html'
+
+    def get_context_data(self, **kwargs):
+        from django.conf import settings
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        plans = SubscriptionPlan.objects.filter(is_active=True)
+        context['plans'] = {p.tier: p for p in plans}
+        return context
 
 def ping(request):
     return HttpResponse("Pong", status=200)

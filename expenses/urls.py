@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, views_payment
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -51,4 +51,8 @@ urlpatterns = [
 
     # to keep alive on render
     path('ping/', views.ping, name='ping'),
+
+    # Payments
+    path('create-order/', views_payment.create_order, name='create-order'),
+    path('verify-payment/', views_payment.verify_payment, name='verify-payment'),
 ]

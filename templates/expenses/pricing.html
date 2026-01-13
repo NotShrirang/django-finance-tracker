@@ -22,36 +22,44 @@
             <div class="card-body d-flex flex-column">
                 <h1 class="card-title pricing-card-title display-5 fw-bold">₹0<small class="text-muted fw-light fs-4">/mo</small></h1>
                 <ul class="list-unstyled mt-3 mb-4 text-start small mx-auto">
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Expenses</li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Income Entries</li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>1 Budget Category</li>
-                    <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Basic Reports</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Expenses/Income</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>5 Categories</li>
+                    <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Export Info</li>
                     <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Recurring Transactions</li>
                 </ul>
-                <a href="{% url 'signup' %}" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold">Sign up for free</a>
+                {% if user.profile.tier == 'FREE' %}
+                    <button type="button" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold" disabled>Current Plan</button>
+                {% else %}
+                    <a href="#" class="w-100 btn btn-lg btn-outline-secondary mt-auto rounded-pill fw-bold disabled">Included</a>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Premium Plan -->
+    <!-- Plus Plan -->
     <div class="col">
         <div class="card mb-4 rounded-4 shadow border-primary h-100 position-relative transform-scale-sm">
             <div class="position-absolute top-0 start-50 translate-middle">
                 <span class="badge rounded-pill text-bg-primary px-3 py-2 shadow-sm">MOST POPULAR</span>
             </div>
             <div class="card-header py-3 bg-primary bg-opacity-10 border-0">
-                <h4 class="my-0 fw-bold text-primary">Premium</h4>
+                <h4 class="my-0 fw-bold text-primary">Plus <span class="badge bg-danger ms-2 rounded-pill" style="font-size: 0.6em;">LIMITED OFFER</span></h4>
             </div>
             <div class="card-body d-flex flex-column">
-                <h1 class="card-title pricing-card-title display-5 fw-bold">₹99<small class="text-muted fw-light fs-4">/yr</small></h1>
+                <h1 class="card-title pricing-card-title display-5 fw-bold"><span class="text-decoration-line-through text-muted fs-3 me-2">₹{{ plans.PLUS.price|floatformat:0 }}</span>FREE<small class="text-muted fw-light fs-4"></small></h1>
                 <ul class="list-unstyled mt-3 mb-4 text-start small mx-auto">
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Everything in Free</strong></li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Up to 5 Budget Categories</li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Advanced Reports</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>10 Budget Categories</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>3 Recurring Transactions</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Export to CSV/Excel</li>
-                    <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Recurring Transactions</li>
                 </ul>
-                <button type="button" class="w-100 btn btn-lg btn-primary mt-auto rounded-pill fw-bold shadow-lg">Get Premium</button>
+                {% if user.profile.tier == 'PLUS' and user.profile.is_plus %}
+                     <button type="button" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold" disabled>Current Plan</button>
+                {% elif user.profile.is_pro %}
+                     <button type="button" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold" disabled>Included</button>
+                {% else %}
+                    <button onclick="startPayment('PLUS')" class="w-100 btn btn-lg btn-primary mt-auto rounded-pill fw-bold shadow-lg">Upgrade to Plus</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -60,18 +68,22 @@
     <div class="col">
         <div class="card mb-4 rounded-4 shadow-sm border-0 h-100 position-relative hover-lift">
             <div class="card-header py-3 bg-transparent border-0">
-                <h4 class="my-0 fw-normal">Pro</h4>
+                <h4 class="my-0 fw-normal">Pro <span class="badge bg-danger ms-2 rounded-pill" style="font-size: 0.6em;">LIMITED OFFER</span></h4>
             </div>
             <div class="card-body d-flex flex-column">
-                <h1 class="card-title pricing-card-title display-5 fw-bold">₹299<small class="text-muted fw-light fs-4">/yr</small></h1>
+                <h1 class="card-title pricing-card-title display-5 fw-bold"><span class="text-decoration-line-through text-muted fs-3 me-2">₹{{ plans.PRO.price|floatformat:0 }}</span>FREE<small class="text-muted fw-light fs-4"></small></h1>
                 <ul class="list-unstyled mt-3 mb-4 text-start small mx-auto">
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Everything in Premium</strong></li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Budgets</li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Recurring Transactions</strong></li>
-                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>AI Spending Insights</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Everything in Plus</strong></li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Categories</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Recurring Txs</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Priority Support</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>AI Insights (Coming Soon)</li>
                 </ul>
-                <button type="button" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold">Contact Sales</button>
+                 {% if user.profile.is_pro %}
+                    <button type="button" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold" disabled>Current Plan</button>
+                {% else %}
+                     <button onclick="startPayment('PRO')" class="w-100 btn btn-lg btn-outline-primary mt-auto rounded-pill fw-bold">Go Pro</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -82,37 +94,95 @@
     <div class="col-lg-8">
         <h3 class="text-center fw-bold mb-4">Frequently Asked Questions</h3>
         <div class="accordion accordion-flush" id="pricingFAQ">
-            <div class="accordion-item bg-transparent">
+             <!-- ... FAQs ... -->
+             <div class="accordion-item bg-transparent">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
                         Can I switch plans later?
                     </button>
                 </h2>
                 <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
-                    <div class="accordion-body text-muted">A: Absolutely! You can upgrade or downgrade your plan at any time from your account settings. Prorated charges will apply.</div>
+                    <div class="accordion-body text-muted">A: Absolutely! You can upgrade your plan at any time.</div>
                 </div>
             </div>
-            <div class="accordion-item bg-transparent">
+             <div class="accordion-item bg-transparent">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                        Is my data safe?
+                         What payment methods are accepted?
                     </button>
                 </h2>
                 <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
-                    <div class="accordion-body text-muted">A: Yes, we use industry-standard encryption to protect your data. We never sell your personal information to third parties.</div>
-                </div>
-            </div>
-            <div class="accordion-item bg-transparent">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                        Do you offer refunds?
-                    </button>
-                </h2>
-                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
-                    <div class="accordion-body text-muted">A: If you're not satisfied with TrackMyRupee Pro within the first 14 days, contact us for a full refund.</div>
+                    <div class="accordion-body text-muted">A: We accept all major Credit/Debit Cards, UPI, and Netbanking via Razorpay.</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+async function startPayment(planType) {
+    try {
+        const response = await fetch("{% url 'create-order' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({plan_type: planType})
+        });
+        
+        const orderData = await response.json();
+        
+        if (orderData.error) {
+            alert('Error: ' + orderData.error);
+            return;
+        }
+
+        var options = {
+            "key": "{{ RAZORPAY_KEY_ID }}", // Enter the Key ID generated from the Dashboard
+            "amount": orderData.amount, 
+            "currency": orderData.currency,
+            "name": "TrackMyRupee",
+            "description": "Upgrade to " + planType,
+            "order_id": orderData.id, 
+            "handler": async function (response){
+                // Verify Payment on Server
+                const verifyRes = await fetch("{% url 'verify-payment' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                         'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    })
+                });
+                
+                const verifyData = await verifyRes.json();
+                if (verifyData.success) {
+                    window.location.href = "{% url 'settings-home' %}?upgraded=true";
+                } else {
+                    alert("Payment Verification Failed: " + verifyData.error);
+                }
+            },
+            "prefill": {
+                "name": "{{ user.username }}",
+                "email": "{{ user.email }}",
+            },
+            "theme": {
+                "color": "#0d6efd"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+        
+    } catch (e) {
+        console.error(e);
+        alert('Something went wrong. Please try again.');
+    }
+}
+</script>
 {% endblock %}
