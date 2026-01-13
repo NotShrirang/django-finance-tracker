@@ -1852,3 +1852,48 @@ class PricingView(TemplateView):
 
 def ping(request):
     return HttpResponse("Pong", status=200)
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+class ContactView(View):
+    template_name = 'contact.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+
+        if not all([name, email, subject, message]):
+            messages.error(request, "All fields are required.")
+            return render(request, self.template_name)
+
+        full_message = f"""
+        New Contact Form Submission:
+        
+        Name: {name}
+        Email: {email}
+        Subject: {subject}
+        
+        Message:
+        {message}
+        """
+
+        try:
+            send_mail(
+                subject=f"Contact Form: {subject}",
+                message=full_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['track.my.rupee.app@gmail.com'],
+                fail_silently=False,
+            )
+            messages.success(request, "Your message has been sent! We'll get back to you shortly.")
+            return redirect('contact')
+        except Exception as e:
+            # Log error if possible
+            messages.error(request, "Something went wrong. Please try again later.")
+            return render(request, self.template_name)

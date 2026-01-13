@@ -87,6 +87,16 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        /* Universal Fade In Animation */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0; 
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
 
 
         /* Dropdown Items */
@@ -320,6 +330,11 @@
                     <li class="nav-item">
                         <a href="{% url 'landing' %}" class="nav-link">
                             Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'demo_login' %}" class="nav-link">
+                            Live Demo
                         </a>
                     </li>
                     <li class="nav-item">

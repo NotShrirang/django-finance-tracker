@@ -2,6 +2,8 @@
 
 A personal finance application to track expenses, analyze spending trends, and visualize data.
 
+**🚀 Use the hosted version comfortably at [trackmyrupee.com](https://trackmyrupee.com)**
+
 ## Standout Features
 
 ### 1. Interactive Budget Dashboard

@@ -32,9 +32,18 @@ from .models import UserProfile, PaymentHistory
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'tier', 'subscription_end_date', 'is_lifetime', 'is_pro')
+    list_display = ('user', 'tier', 'subscription_end_date', 'is_lifetime', 'is_pro', 'email_verified')
     list_filter = ('tier', 'is_lifetime')
     search_fields = ('user__username', 'user__email')
+
+    def email_verified(self, obj):
+        from allauth.account.models import EmailAddress
+        try:
+            email_address = EmailAddress.objects.get(user=obj.user, primary=True)
+            return email_address.verified
+        except EmailAddress.DoesNotExist:
+            return False
+    email_verified.boolean = True
     
 @admin.register(PaymentHistory)
 class PaymentHistoryAdmin(admin.ModelAdmin):

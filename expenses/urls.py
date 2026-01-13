@@ -47,7 +47,7 @@ urlpatterns = [
     # Static Pages
     path('privacy-policy/', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy-policy'),
     path('terms-of-service/', TemplateView.as_view(template_name='terms_of_service.html'), name='terms-of-service'),
-    path('contact/', TemplateView.as_view(template_name='contact.html'), name='contact'),
+    path('contact/', views.ContactView.as_view(), name='contact'),
     path('sitemap.xml', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 
@@ -57,4 +57,7 @@ urlpatterns = [
     # Payments
     path('create-order/', views_payment.create_order, name='create-order'),
     path('verify-payment/', views_payment.verify_payment, name='verify-payment'),
+    
+    # Sentry Debug
+    path('sentry-debug/', lambda request: 1 / 0),
 ]
