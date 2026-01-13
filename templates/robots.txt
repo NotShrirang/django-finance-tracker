@@ -6,4 +6,4 @@ Disallow: /expenses/
 Disallow: /settings/
 Disallow: /accounts/
 
-Sitemap: https://trackmyrupee.onrender.com/sitemap.xml
+Sitemap: https://trackmyrupee.com/sitemap.xml
