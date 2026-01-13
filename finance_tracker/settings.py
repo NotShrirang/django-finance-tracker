@@ -33,7 +33,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']  # Update this to specific domain in production
 
-CSRF_TRUSTED_ORIGINS = ['https://django-finance-tracker-fr1u.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://trackmyrupee.com']
 
 
 # Application definition
