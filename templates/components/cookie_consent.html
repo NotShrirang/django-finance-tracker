@@ -1,0 +1,41 @@
+<div id="cookie-consent-banner" class="fixed-bottom bg-dark text-white p-3 shadow-lg d-none" style="z-index: 9999; border-top: 1px solid rgba(255,255,255,0.1);">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+        <div class="text-center text-md-start">
+            <p class="mb-0 small">
+                We use cookies to improve your experience and analyze site traffic. 
+                By clicking "Accept", you verify that you are comfortable with us using tracking cookies.
+                <a href="{% url 'privacy-policy' %}" class="text-white text-decoration-underline">Privacy Policy</a>.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button id="btn-decline-cookies" class="btn btn-sm btn-outline-light px-4">Decline</button>
+            <button id="btn-accept-cookies" class="btn btn-sm btn-primary px-4">Accept</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const consent = localStorage.getItem('cookieConsent');
+        const banner = document.getElementById('cookie-consent-banner');
+        
+        // Show banner if no choice made
+        if (!consent) {
+            banner.classList.remove('d-none');
+        }
+
+        // Handle Accept
+        document.getElementById('btn-accept-cookies').addEventListener('click', function() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            banner.classList.add('d-none');
+            // Reload to enable tracking immediately
+            window.location.reload(); 
+        });
+
+        // Handle Decline
+        document.getElementById('btn-decline-cookies').addEventListener('click', function() {
+            localStorage.setItem('cookieConsent', 'declined');
+            banner.classList.add('d-none');
+        });
+    });
+</script>

@@ -105,6 +105,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'expenses.context_processors.currency_symbol',
+                'finance_tracker.context_processors.google_analytics',
             ],
         },
     },
@@ -198,6 +199,9 @@ SITE_ID = int(os.environ.get('SITE_ID', 1))
 
 # Account Settings
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+# Google Analytics
+GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID')
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_SESSION_REMEMBER = False

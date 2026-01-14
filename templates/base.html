@@ -2,6 +2,25 @@
 <html lang="en" data-bs-theme="dark">
 
 <head>
+    {% if GOOGLE_ANALYTICS_ID %}
+    <!-- Google Analytics (Consent-Aware) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('cookieConsent') === 'accepted') {
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}";
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
+            }
+        });
+    </script>
+    {% endif %}
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
@@ -624,7 +643,7 @@
 
     <!-- Django Messages Toast Container -->
     {% if messages %}
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;">
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11000;">
         {% for message in messages %}
         <div class="toast align-items-center text-bg-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} border-0 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -733,29 +752,7 @@
     <!-- Driver.js for Tutorial -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     
-    <!-- Cookie Consent Banner -->
-    <div id="cookieBanner" class="position-fixed bottom-0 start-0 w-100 bg-dark text-white p-3 shadow-lg" style="display: none; z-index: 1050; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <p class="mb-2 mb-md-0 small">
-                We use cookies to enhance your experience and analyze our traffic. By continuing to visit this site you agree to our use of cookies.
-                <a href="{% url 'privacy-policy' %}" class="text-white text-decoration-underline ms-1">Privacy Policy</a>
-            </p>
-            <button id="acceptCookies" class="btn btn-sm btn-primary px-4 rounded-pill fw-bold">Got it!</button>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!localStorage.getItem('cookieConsent')) {
-                document.getElementById('cookieBanner').style.display = 'block';
-            }
-            
-            document.getElementById('acceptCookies').addEventListener('click', function() {
-                localStorage.setItem('cookieConsent', 'true');
-                document.getElementById('cookieBanner').style.display = 'none';
-            });
-        });
-    </script>
+    {% include 'components/cookie_consent.html' %}
     
     {% block scripts %}{% endblock %}
 
