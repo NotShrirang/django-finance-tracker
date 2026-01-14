@@ -24,21 +24,11 @@
             banner.classList.remove('d-none');
         }
 
-        // Handle Accept
         document.getElementById('btn-accept-cookies').addEventListener('click', function() {
             localStorage.setItem('cookieConsent', 'accepted');
             
-            // Update Consent Mode
-            if (typeof gtag === 'function') {
-                gtag('consent', 'update', {
-                    'ad_storage': 'granted',
-                    'ad_user_data': 'granted',
-                    'ad_personalization': 'granted',
-                    'analytics_storage': 'granted'
-                });
-            }
-
-            banner.classList.add('d-none');
+            // Reload to ensure a fresh "Granted" page load for the scanner
+            window.location.reload();
         });
 
         // Handle Decline
