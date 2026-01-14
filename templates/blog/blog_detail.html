@@ -77,7 +77,42 @@
                 <div class="blog-content fs-5 lh-lg text-break">
                     {{ post.content|markdown }}
                 </div>
-            </article>
+                </article>
+
+                <div class="mt-5 text-center">
+                    <p class="text-muted mb-3 fw-bold small text-uppercase">Share this post</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <!-- X (Twitter) -->
+                        <a href="https://twitter.com/intent/tweet?text={{ post.title|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-twitter rounded-circle" title="Share on X">
+                            <i class="bi bi-twitter-x"></i>
+                        </a>
+                        
+                        <!-- LinkedIn -->
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-linkedin rounded-circle" title="Share on LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        
+                        <!-- Facebook -->
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-facebook rounded-circle" title="Share on Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        
+                        <!-- WhatsApp -->
+                        <a href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-whatsapp rounded-circle" title="Share on WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+
+                        <!-- Reddit -->
+                        <a href="https://www.reddit.com/submit?url={{ request.build_absolute_uri|urlencode }}&title={{ post.title|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-reddit rounded-circle" title="Share on Reddit">
+                            <i class="bi bi-reddit"></i>
+                        </a>
+                    </div>
+                </div>
 
             <div class="mt-5 pt-4 border-top text-center">
                 <a href="{% url 'blog_list' %}" class="btn btn-outline-primary rounded-pill px-4">
