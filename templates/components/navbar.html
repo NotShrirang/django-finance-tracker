@@ -1,0 +1,115 @@
+{% load static %}
+<!-- Unified Navbar -->
+<nav class="navbar navbar-expand-lg {% if is_landing %}fixed-top navbar-landing{% else %}bg-body-tertiary border-bottom{% endif %}">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'landing' %}{% endif %}">
+            {% if is_landing %}
+                <i class="bi bi-graph-up-arrow text-gradient" style="font-size: 1.5rem;"></i>
+                <span class="fs-4">TrackMyRupee</span>
+            {% else %}
+                <i class="bi bi-graph-up-arrow me-2"></i>TrackMyRupee
+            {% endif %}
+        </a>
+        
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center gap-lg-3">
+                
+                <!-- Authenticated User Links -->
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'expense-list' %}" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
+                            Expenses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'recurring-list' %}" class="nav-link {% if 'recurring' in request.resolver_match.url_name %}active{% endif %}">
+                            Subscriptions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'calendar' %}" class="nav-link {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}">
+                            Calendar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'settings-home' %}" class="nav-link {% if 'settings' in request.resolver_match.url_name or 'profile' in request.resolver_match.url_name %}active{% endif %}">
+                            Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'blog_list' %}" class="nav-link {% if 'blog' in request.resolver_match.url_name %}active{% endif %}">
+                            Blog
+                        </a>
+                    </li>
+
+                    <!-- Vertical Divider (Desktop) -->
+                    <li class="nav-item d-none d-lg-flex align-items-center mx-2">
+                        <div class="vr h-50 my-auto text-body opacity-25"></div>
+                    </li>
+
+                    <!-- Action Dropdown -->
+                    <li class="nav-item dropdown d-none d-lg-block ms-2">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="text-gradient-primary">Add</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li><a class="dropdown-item py-2" href="{% url 'expense-create' %}?next={{ request.path }}"><i class="bi bi-dash-circle text-danger me-2"></i> Add Expense</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'recurring-create' %}?next={{ request.path }}"><i class="bi bi-arrow-repeat text-primary me-2"></i> Add Subscription</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'income-create' %}?next={{ request.path }}"><i class="bi bi-plus-circle text-success me-2"></i> Add Income</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <form action="{% url 'account_logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn btn-link text-decoration-none">Logout</button>
+                        </form>
+                    </li>
+
+                {% else %}
+                    <!-- Guest / Landing Page Links -->
+                    {% if is_landing %}
+                        <li class="nav-item"><a href="#features" class="nav-link fw-bold text-muted px-2">Features</a></li>
+                        <li class="nav-item"><a href="#pricing" class="nav-link fw-bold text-muted px-2">Pricing</a></li>
+                    {% endif %}
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'demo_login' %}" class="nav-link {% if is_landing %}fw-bold text-muted{% endif %}">Live Demo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'blog_list' %}" class="nav-link {% if is_landing %}fw-bold text-muted{% endif %}">Blog</a>
+                    </li>
+                    
+                    <div class="vr d-none d-lg-block text-body opacity-25 mx-2"></div>
+
+                    <li class="nav-item">
+                        <a href="{% url 'account_login' %}" class="nav-link">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        {% if is_landing %}
+                            <a href="{% url 'signup' %}" class="cta-button btn-sm py-2 px-4 shadow-sm text-decoration-none" style="font-size: 0.9rem;">Join Now</a>
+                        {% else %}
+                            <a href="{% url 'signup' %}" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i> Sign Up</a>
+                        {% endif %}
+                    </li>
+                {% endif %}
+
+                <!-- Theme Toggle & Install App -->
+                <li class="nav-item ms-lg-2">
+                    <button class="btn btn-link nav-link p-1" id="theme-toggle" title="Toggle theme">
+                        <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

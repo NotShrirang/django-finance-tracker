@@ -264,37 +264,8 @@
 
     <!-- Navbar -->
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
-                <i class="bi bi-graph-up-arrow text-gradient" style="font-size: 1.5rem;"></i>
-                <span class="fs-4">TrackMyRupee</span>
-            </a>
-            
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list fs-2 text-body"></i>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center ms-auto gap-3 pt-3 pt-lg-0">
-                    <a href="#features" class="text-decoration-none text-muted small fw-bold px-2 py-2 py-lg-0 text-nowrap">Features</a>
-                    <a href="#pricing" class="text-decoration-none text-muted small fw-bold px-2 py-2 py-lg-0 text-nowrap">Pricing</a>
-                    <a href="{% url 'demo_login' %}" class="text-decoration-none text-muted small fw-bold px-2 py-2 py-lg-0 text-nowrap">Live Demo</a>
-                    
-                    <div class="vr d-none d-lg-block text-white opacity-25 mx-2"></div>
-                    <hr class="d-lg-none my-1 border-secondary border-opacity-25 w-100">
-                    
-                    <div class="d-flex align-items-center gap-3 w-100 w-lg-auto mt-2 mt-lg-0">
-                        <button class="btn btn-link p-0 text-body" id="theme-toggle" aria-label="Toggle theme">
-                            <i class="bi bi-moon-stars-fill fs-5"></i>
-                        </button>
-                        <a href="{% url 'account_login' %}" class="btn btn-sm text-body px-3">Login</a>
-                        <a href="{% url 'signup' %}" class="cta-button btn-sm py-2 px-4 shadow-sm" style="font-size: 0.9rem;">Join Now</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Navbar -->
+    {% include "components/navbar.html" with is_landing=True %}
 
     <!-- Hero Section -->
     <section class="hero-section text-center text-lg-start">
@@ -719,6 +690,7 @@
             <div class="d-flex justify-content-center gap-4 mb-4">
                 <a href="{% url 'privacy-policy' %}" class="text-secondary text-decoration-none">Privacy Policy</a>
                 <a href="{% url 'terms-of-service' %}" class="text-secondary text-decoration-none">Terms of Service</a>
+                <a href="{% url 'blog_list' %}" class="text-secondary text-decoration-none">Blogs</a>
                 <a href="{% url 'contact' %}" class="text-secondary text-decoration-none">Contact Us</a>
             </div>
             <p class="text-muted small mb-0">&copy; 2026 TrackMyRupee Platform. All rights reserved.</p>

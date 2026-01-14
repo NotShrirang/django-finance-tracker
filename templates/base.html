@@ -8,24 +8,28 @@
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         document.cookie = "django_timezone=" + tz + "; path=/; SameSite=Lax";
     </script>
+    <title>{% block title %}TrackMyRupee - Know Exactly Where Every Rupee Goes{% endblock %}</title>
+    
+    {% block meta_tags %}
     <meta name="description" content="Turn financial chaos into clarity. TrackMyRupee gives you a precision dashboard to visualize your spending, spot trends, and master your monthly budget—all in one place.">
     <meta name="keywords" content="TrackMyRupee, finance, expense tracker, budget, personal finance, money management, django, rupee tracker">
     <meta name="author" content="Omkar Pathak">
-    
+
     <!-- Google Fonts (Unifying with Landing Page) -->
     <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Open Graph / Facebook -->
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:title" content="TrackMyRupee - Know Exactly Where Every Rupee Goes">
     <meta property="og:description" content="Stop Guessing. Start Growing. Track your expenses and master your budget with TrackMyRupee.">
+    {% endblock %}
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
     <meta property="twitter:title" content="TrackMyRupee - Know Exactly Where Every Rupee Goes">
     <meta property="twitter:description" content="Stop Guessing. Start Growing. Turn financial chaos into clarity with TrackMyRupee.">
-
-    <title>TrackMyRupee - Know Exactly Where Every Rupee Goes</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -250,124 +254,7 @@
         </form>
     </div>
     {% endif %}
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'landing' %}{% endif %}">
-                <i class="bi bi-graph-up-arrow me-2"></i>TrackMyRupee
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center gap-lg-3">
-                    {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a href="{% url 'home' %}"
-                            class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'expense-list' %}" id="nav-expenses" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
-                            Expenses
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'recurring-list' %}" class="nav-link {% if 'recurring' in request.resolver_match.url_name %}active{% endif %}">
-                            Subscriptions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'calendar' %}" class="nav-link {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}">
-                            Calendar
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'settings-home' %}" id="nav-settings"
-                            class="nav-link {% if 'category' in request.resolver_match.url_name or 'profile' in request.resolver_match.url_name or 'currency' in request.resolver_match.url_name or 'upload' in request.resolver_match.url_name or 'income' in request.resolver_match.url_name or 'budget' in request.resolver_match.url_name or 'settings' in request.resolver_match.url_name %}active{% endif %}">
-                            Settings
-                        </a>
-                    </li>
-
-                    <!-- Vertical Divider (Desktop) -->
-                    <li class="nav-item d-none d-lg-flex align-items-center mx-2">
-                        <div class="vr h-50 my-auto text-body opacity-25"></div>
-                    </li>
-
-                    <!-- Desktop Action Buttons -->
-                    <li class="nav-item dropdown d-none d-lg-block ms-2">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="text-gradient-primary">Add</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                            <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'expense-create' %}?next={{ request.path }}">
-                                    <i class="bi bi-dash-circle text-danger me-2"></i> Add Expense
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'recurring-create' %}?next={{ request.path }}">
-                                    <i class="bi bi-arrow-repeat text-primary me-2"></i> Add Subscription
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'income-create' %}?next={{ request.path }}">
-                                    <i class="bi bi-plus-circle text-success me-2"></i> Add Income
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item">
-                        <form action="{% url 'account_logout' %}" method="post" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-link btn btn-link text-decoration-none">
-                                Logout
-                            </button>
-                        </form>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a href="{% url 'landing' %}" class="nav-link">
-                            Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'demo_login' %}" class="nav-link">
-                            Live Demo
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'account_login' %}" class="nav-link">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'signup' %}" class="btn btn-primary">
-                            <i class="bi bi-person-plus me-1"></i> Sign Up
-                        </a>
-                    </li>
-                    {% endif %}
-
-
-
-                    <!-- Simple Theme Toggle -->
-                    <!-- Install App Button (Hidden by default) -->
-                    <li class="nav-item" id="installAppContainer" style="display: none;">
-                        <button class="btn btn-outline-primary btn-sm rounded-pill d-flex align-items-center gap-2" id="installAppBtn">
-                            <i class="bi bi-phone"></i> <span>Install App</span>
-                        </button>
-                    </li>
-
-                    <li class="nav-item">
-                        <button class="btn btn-link nav-link p-1" id="theme-toggle" title="Toggle theme">
-                            <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include "components/navbar.html" with is_landing=False %}
 
     <!-- iOS Install Instructions Modal -->
     <div class="modal fade" id="iosInstallModal" tabindex="-1" aria-hidden="true">

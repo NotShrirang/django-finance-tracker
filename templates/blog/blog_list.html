@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-4 fw-bold mb-5 text-center">Blogs</h1>
+    <div class="row g-4 justify-content-center">
+        {% for post in posts %}
+        <div class="col-md-8 col-lg-6">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-3">
+                        <a href="{% url 'blog_detail' post.slug %}" class="text-decoration-none text-dark stretched-link">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted mb-4">
+                        {{ post.summary }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> {{ post.published_date|date:"F j, Y" }}</small>
+                        <span class="text-primary fw-medium">Read Article <i class="bi bi-arrow-right ms-1"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="lead text-muted">No blog posts yet. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}

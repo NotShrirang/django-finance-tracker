@@ -1,11 +1,11 @@
-/* 
-   We are using Bootstrap 5.3 which handles most styling.
-   We can add custom overrides here if needed.
-*/
+/* Global Font Import - Unified Source */
+@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 body {
-    /* Optional: Ensure font family matches user preference if not fully covered by BS */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Main body font - Outfit */
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Animations */

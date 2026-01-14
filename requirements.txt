@@ -25,3 +25,4 @@ whitenoise==6.11.0
 razorpay==2.0.0
 django-anymail==14.0
 sentry-sdk==2.19.2
+markdown==3.9
