@@ -1,11 +1,11 @@
-/* 
-   We are using Bootstrap 5.3 which handles most styling.
-   We can add custom overrides here if needed.
-*/
+/* Global Font Import - Unified Source */
+@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 body {
-    /* Optional: Ensure font family matches user preference if not fully covered by BS */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Main body font - Outfit */
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Animations */
@@ -436,3 +436,110 @@ a:hover {
 .driver-popover {
     transition-duration: 0.1s !important;
 }
+
+/* Theme-aware Image Utility Classes */
+[data-bs-theme="dark"] .img-light {
+    display: none !important;
+}
+
+[data-bs-theme="light"] .img-dark {
+    display: none !important;
+}
+
+/* Fix Dropdown Z-Index Issue */
+.navbar .dropdown-menu {
+    z-index: 10000 !important; /* Ensure it sits above everything */
+}
+
+/* Ensure Navbar sits above filters (which have z-index: 1060) */
+/* Essential because backdrop-filter in dark mode creates a new stacking context */
+.navbar:not(.fixed-top) {
+    position: relative;
+    z-index: 2000;
+}
+
+/* Social Share Buttons */
+.btn-social {
+    color: white !important;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.btn-social:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    opacity: 0.9;
+}
+
+.btn-twitter { background-color: #000000; } /* X / Twitter */
+.btn-linkedin { background-color: #0077b5; }
+.btn-facebook { background-color: #1877f2; }
+.btn-whatsapp { background-color: #25d366; }
+.btn-reddit { background-color: #ff4500; }
+
+/* Blog Content Typography */
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* Fix for first element */
+.blog-content > *:first-child {
+    margin-top: 0;
+}
+
+/* Dashboard Category List Redesign */
+.category-list-item {
+    transition: background-color 0.2s;
+    border-radius: 8px;
+}
+.category-list-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.category-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+}
+
+/* Progress Bars */
+.progress-thin {
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+[data-bs-theme="light"] .progress-thin {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Category Colors (cycling) */
+.cat-color-0 { background: linear-gradient(45deg, #FFB703, #FF8E00); } /* Honey Yellow */
+.cat-color-1 { background: linear-gradient(45deg, #2ecc71, #25d366); } /* Green */
+.cat-color-2 { background: linear-gradient(45deg, #ff6b6b, #ff4500); } /* OrangeRed */
+.cat-color-3 { background: linear-gradient(45deg, #3498db, #0077b5); } /* Blue */
+.cat-color-4 { background: linear-gradient(45deg, #8E2DE2, #4A00E0); } /* Purple */
+
+/* Semantic Gradient Colors */
+.progress-gradient-success { background: linear-gradient(45deg, #2ecc71, #25d366); }
+.progress-gradient-warning { background: linear-gradient(45deg, #FFB703, #FF8E00); }
+.progress-gradient-danger { background: linear-gradient(45deg, #ff6b6b, #ff4500); }
+.progress-gradient-info { background: linear-gradient(45deg, #3498db, #0077b5); }

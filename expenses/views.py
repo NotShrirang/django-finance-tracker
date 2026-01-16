@@ -35,7 +35,18 @@ def create_category_ajax(request):
             
             if not name:
                 return JsonResponse({'success': False, 'error': 'Category name cannot be empty.'}, status=400)
-                
+            
+            # Check Limits
+            current_count = Category.objects.filter(user=request.user).count()
+            limit = 5 # Free
+            if request.user.profile.is_plus:
+                limit = 10
+            if request.user.profile.is_pro:
+                limit = float('inf')
+
+            if current_count >= limit:
+                 return JsonResponse({'success': False, 'error': f'Category limit reached ({limit}). Please upgrade.'}, status=403)
+
             category = Category.objects.create(user=request.user, name=name)
             return JsonResponse({'success': True, 'id': category.id, 'name': category.name})
             
@@ -45,7 +56,7 @@ def create_category_ajax(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
             
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
-from .models import Expense, Category, Income, RecurringTransaction, UserProfile
+from .models import Expense, Category, Income, RecurringTransaction, UserProfile, SubscriptionPlan
 from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm
 import openpyxl
 import calendar
@@ -57,6 +68,52 @@ import calendar
 # from datetime import datetime, date, timedelta
 
 from django.core.management import call_command
+from allauth.account.models import EmailAddress
+import json
+
+def resend_verification_email(request):
+    """
+    AJAX view to resend verification email.
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            
+            # If email is not in body, try to get from logged in user
+            if not email and request.user.is_authenticated:
+                email = request.user.email
+            
+            # Fallback: Check allauth session key
+            if not email:
+                email = request.session.get('account_email')
+
+            if not email:
+                return JsonResponse({'success': False, 'error': 'Email is missing.'}, status=400)
+            
+            try:
+                # Case-insensitive lookup just in case
+                email_address = EmailAddress.objects.filter(email__iexact=email).first()
+                if not email_address:
+                     return JsonResponse({'success': False, 'error': f'Email {email} not found in system.'}, status=404)
+                
+                # Check if already verified
+                if email_address.verified:
+                    return JsonResponse({'success': True, 'message': 'Email already verified.'})
+
+                email_address.send_confirmation(request)
+                return JsonResponse({'success': True, 'message': 'Verification email sent!'})
+
+            except Exception as e:
+                # Log the actual error for debugging
+                import traceback
+                print(traceback.format_exc())
+                return JsonResponse({'success': False, 'error': f'Send failed: {str(e)}'}, status=500)
+                
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f'Server Error: {str(e)}'}, status=500)
+            
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
 def demo_login(request):
     """
@@ -164,6 +221,12 @@ class LandingPageView(TemplateView):
         if request.user.is_authenticated:
             return redirect('home')
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        plans = SubscriptionPlan.objects.filter(is_active=True)
+        context['plans'] = {p.tier: p for p in plans}
+        return context
 
 class SettingsHomeView(LoginRequiredMixin, TemplateView):
     template_name = 'expenses/settings_home.html'
@@ -339,6 +402,32 @@ def home_view(request):
     top_expenses_qs = expenses.order_by('-amount')[:5]
     top_labels = [e.description[:20] + '...' if len(e.description) > 20 else e.description for e in top_expenses_qs]
     top_amounts = [float(e.amount) for e in top_expenses_qs]
+
+    # --- NEW: Income vs Expenses Trend Data ---
+    # Re-use the truncation logic determined above
+    if start_date or end_date or (len(selected_months) == 1 and len(selected_years) == 1):
+        trunc_func = TruncDay
+    else:
+        trunc_func = TruncMonth
+        
+    inc_trend = incomes.annotate(period=trunc_func('date')).values('period').annotate(total=Sum('amount')).order_by('period')
+    exp_trend = expenses.annotate(period=trunc_func('date')).values('period').annotate(total=Sum('amount')).order_by('period')
+    
+    # Merge periods
+    inc_periods = set(i['period'] for i in inc_trend)
+    exp_periods = set(e['period'] for e in exp_trend)
+    all_periods_sorted = sorted(list(inc_periods.union(exp_periods)))
+    
+    ie_labels = [p.strftime(date_format) for p in all_periods_sorted]
+    ie_income_data = [float(inc_trend.get(period=p)['total']) if inc_trend.filter(period=p).exists() else 0 for p in all_periods_sorted]
+    # Optimization: Use dict lookup instead of filter inside loop
+    inc_map = {i['period']: float(i['total']) for i in inc_trend}
+    exp_map = {e['period']: float(e['total']) for e in exp_trend}
+    
+    ie_income_data = [inc_map.get(p, 0.0) for p in all_periods_sorted]
+    ie_expense_data = [exp_map.get(p, 0.0) for p in all_periods_sorted]
+    ie_savings_data = [inc_map.get(p, 0.0) - exp_map.get(p, 0.0) for p in all_periods_sorted]
+
 
     # 4. Summary Stats
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -638,6 +727,11 @@ def home_view(request):
         'trend_title': trend_title,
         'top_labels': top_labels,
         'top_amounts': top_amounts,
+        # New Context
+        'ie_labels': ie_labels,
+        'ie_income_data': ie_income_data,
+        'ie_expense_data': ie_expense_data,
+        'ie_savings_data': ie_savings_data,
         'years': years,
         'all_categories': all_categories,
         'selected_years': selected_years,
@@ -1080,6 +1174,11 @@ def export_expenses(request):
     """
     Export expenses to CSV based on current filters.
     """
+    # Check Limits
+    if not request.user.profile.is_plus:
+        messages.error(request, "Export is available on Plus and Pro plans.")
+        return redirect('pricing')
+
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
 
     # Filter Logic
@@ -1630,6 +1729,18 @@ class RecurringTransactionCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
+        # Check Limits
+        current_count = RecurringTransaction.objects.filter(user=self.request.user, is_active=True).count()
+        limit = 0 # Free
+        if self.request.user.profile.is_plus:
+            limit = 3
+        if self.request.user.profile.is_pro:
+            limit = float('inf')
+
+        if current_count >= limit:
+             messages.error(self.request, f"Recurring Transaction limit reached ({limit}). Please upgrade.")
+             return redirect('pricing')
+             
         form.instance.user = self.request.user
         messages.success(self.request, 'Recurring transaction created successfully.')
         return super().form_valid(form)
@@ -1807,3 +1918,59 @@ def demo_login(request):
 
 class PricingView(TemplateView):
     template_name = 'expenses/pricing.html'
+
+    def get_context_data(self, **kwargs):
+        from django.conf import settings
+        context = super().get_context_data(**kwargs)
+        context['RAZORPAY_KEY_ID'] = settings.RAZORPAY_KEY_ID
+        plans = SubscriptionPlan.objects.filter(is_active=True)
+        context['plans'] = {p.tier: p for p in plans}
+        return context
+
+def ping(request):
+    return HttpResponse("Pong", status=200)
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+class ContactView(View):
+    template_name = 'contact.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+
+        if not all([name, email, subject, message]):
+            messages.error(request, "All fields are required.")
+            return render(request, self.template_name)
+
+        full_message = f"""
+        New Contact Form Submission:
+        
+        Name: {name}
+        Email: {email}
+        Subject: {subject}
+        
+        Message:
+        {message}
+        """
+
+        try:
+            send_mail(
+                subject=f"Contact Form: {subject}",
+                message=full_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['track.my.rupee.app@gmail.com'],
+                fail_silently=False,
+            )
+            messages.success(request, "Your message has been sent! We'll get back to you shortly.")
+            return redirect('contact')
+        except Exception as e:
+            # Log error if possible
+            messages.error(request, "Something went wrong. Please try again later.")
+            return render(request, self.template_name)

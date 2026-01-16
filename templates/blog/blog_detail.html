@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load blog_extras %}
+
+{% block title %}{{ post.title }} | TrackMyRupee{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="{{ post.summary }}">
+<meta name="keywords" content="finance, budget, expense tracker, {{ post.title }}, TrackMyRupee">
+<meta name="author" content="Omkar Pathak">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ post.summary }}">
+{% if post.image %}
+<meta property="og:image" content="{{ post.image.url }}">
+{% else %}
+<meta property="og:image" content="https://trackmyrupee.com/static/img/og-preview.png">
+{% endif %}
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ post.title }}">
+<meta name="twitter:description" content="{{ post.summary }}">
+{% if post.image %}
+<meta name="twitter:image" content="{{ post.image.url }}">
+{% else %}
+<meta name="twitter:image" content="https://trackmyrupee.com/static/img/og-preview.png">
+{% endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.title }}",
+  "datePublished": "{{ post.published_date|date:'Y-m-d' }}",
+  "dateModified": "{{ post.updated_date|date:'Y-m-d' }}",
+  "author": {
+    "@type": "Person",
+    "name": "Omkar Pathak"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TrackMyRupee",
+    "logo": {
+        "@type": "ImageObject",
+        "url": "https://trackmyrupee.com/static/img/icon.png"
+    }
+  },
+  "description": "{{ post.summary }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.build_absolute_uri }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'blog_list' %}" class="text-decoration-none">Blog</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ post.title }}</li>
+                </ol>
+            </nav>
+
+            <article>
+                <h1 class="display-5 fw-bold mb-3">{{ post.title }}</h1>
+                <div class="text-muted mb-5 d-flex align-items-center">
+                    <i class="bi bi-calendar3 me-2"></i> {{ post.published_date|date:"F j, Y" }}
+                </div>
+
+                <div class="blog-content fs-5 lh-lg text-break">
+                    {{ post.content|markdown }}
+                </div>
+                </article>
+
+                <div class="mt-5 text-center">
+                    <p class="text-muted mb-3 fw-bold small text-uppercase">Share this post</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <!-- X (Twitter) -->
+                        <a href="https://twitter.com/intent/tweet?text={{ post.title|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-twitter rounded-circle" title="Share on X">
+                            <i class="bi bi-twitter-x"></i>
+                        </a>
+                        
+                        <!-- LinkedIn -->
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-linkedin rounded-circle" title="Share on LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        
+                        <!-- Facebook -->
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-facebook rounded-circle" title="Share on Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        
+                        <!-- WhatsApp -->
+                        <a href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-whatsapp rounded-circle" title="Share on WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+
+                        <!-- Reddit -->
+                        <a href="https://www.reddit.com/submit?url={{ request.build_absolute_uri|urlencode }}&title={{ post.title|urlencode }}" 
+                           target="_blank" class="btn btn-social btn-reddit rounded-circle" title="Share on Reddit">
+                            <i class="bi bi-reddit"></i>
+                        </a>
+                    </div>
+                </div>
+
+            <div class="mt-5 pt-4 border-top text-center">
+                <a href="{% url 'blog_list' %}" class="btn btn-outline-primary rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Blog
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
