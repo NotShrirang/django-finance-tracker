@@ -551,7 +551,7 @@
 
     <!-- Global Loader Overlay -->
     <div id="page-loader" class="position-fixed top-0 start-0 w-100 h-100 d-none justify-content-center align-items-center" 
-         style="background: rgba(var(--bs-body-bg-rgb), 0.8); z-index: 10000; backdrop-filter: blur(2px);">
+         style="background: rgba(var(--bs-body-bg-rgb), 0.8); z-index: 20000; backdrop-filter: blur(2px);">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">Loading...</span>
         </div>
@@ -571,42 +571,76 @@
             if (loader) loader.classList.add('d-none');
         };
 
-        // Handle Form Submits
+        // 1. Handle Programmatic Form Submits
+        (function() {
+            const originalSubmit = HTMLFormElement.prototype.submit;
+            HTMLFormElement.prototype.submit = function() {
+                if (!this.classList.contains('no-loader') && this.target !== '_blank') {
+                    showLoader();
+                }
+                originalSubmit.apply(this, arguments);
+            };
+        })();
+
+        // 2. Handle Standard Form Submits
         document.addEventListener('submit', function(e) {
-            // Don't show if default is prevented (validation error)
             if (!e.defaultPrevented) {
                 const form = e.target;
-                // Check if it's a "no-loader" form or has target="_blank"
                 if (!form.classList.contains('no-loader') && form.target !== '_blank') {
                     showLoader();
                 }
             }
         });
 
-        // Handle Link Clicks
+        // 3. Handle Link Clicks
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
             
-            // Criteria to show loader:
-            // 1. Is an anchor tag
-            // 2. Has an href
-            // 3. Not opening in new tab/window
-            // 4. Not a hash link (internal anchor)
-            // 5. Not a javascript: link
-            // 6. Does not have 'no-loader' class
-            // 7. Not a download link
-            if (link && link.href && 
-                !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && 
-                link.target !== '_blank' && 
-                !link.href.includes('#') && 
-                !link.href.startsWith('javascript:') && 
-                !link.classList.contains('no-loader') &&
-                !link.hasAttribute('download')) {
-                
-                // Allow time for ripple effects or other immediate interactions
-                // But generally show immediately
-                showLoader();
+            if (!link || !link.href) return;
+            
+            // Ignore modifiers and new tabs
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || link.target === '_blank') return;
+            
+            // Ignore download links
+            if (link.hasAttribute('download')) return;
+            
+            // Ignore explicit no-loader
+            if (link.classList.contains('no-loader')) return;
+
+            // Ignore UI Toggles (Bootstrap, etc)
+            if (link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-bs-dismiss')) return;
+
+            // Ignore standard protocols that don't unload page
+            if (link.href.startsWith('javascript:') || 
+                link.href.startsWith('mailto:') || 
+                link.href.startsWith('tel:')) return;
+
+            // Robust Hash Check
+            const hrefAttr = link.getAttribute('href');
+            if (!hrefAttr || hrefAttr === '#') return; // Empty or just hash
+            
+            // Check for in-page anchors
+            if (hrefAttr.startsWith('#')) {
+                return;
             }
+
+            // Check if it's a full URL processing to the same page with a hash
+            // e.g. /path/to/page#section vs /path/to/page
+            try {
+                const url = new URL(link.href);
+                const isSamePage = (url.origin === location.origin) && 
+                                   (url.pathname === location.pathname) && 
+                                   (url.search === location.search);
+                
+                if (isSamePage && url.hash) {
+                    return;
+                }
+            } catch (err) {
+                // If URL parsing fails, assume it's just a path and proceed
+            }
+
+            // Show loader for all valid navigations
+            showLoader();
         });
 
         // Hide on Back Button (bfcache)
