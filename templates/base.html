@@ -364,20 +364,70 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="mt-auto bg-body-tertiary border-top py-3">
-        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-between gap-3">
-            <div class="text-center text-md-start">
-                <p class="text-muted small mb-1">&copy; {% now "Y" %} TrackMyRupee. All rights reserved.</p>
-                <div class="d-flex gap-3 small justify-content-center justify-content-md-start">
-                    <a href="{% url 'privacy-policy' %}" class="text-decoration-none text-muted">Privacy</a>
-                    <a href="{% url 'terms-of-service' %}" class="text-decoration-none text-muted">Terms</a>
-                    <a href="{% url 'contact' %}" class="text-decoration-none text-muted">Contact</a>
+    <footer class="mt-auto bg-body-tertiary border-top pt-5 pb-3">
+        <div class="container">
+            <div class="row g-4 justify-content-between">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <a href="/" class="d-flex align-items-center gap-2 mb-3 text-decoration-none">
+                        <img src="{% static 'img/logo.svg' %}" alt="TMR" width="32" height="32" class="d-inline-block align-text-top rounded-3">
+                        <span class="fs-4 fw-bold text-body">TrackMyRupee</span>
+                    </a>
+                    <p class="text-muted small mb-4">
+                        Turn financial chaos into clarity. TrackMyRupee gives you a precision dashboard to visualize your spending, spot trends, and master your monthly budget.
+                    </p>
+                    <a href="https://rzp.io/rzp/AP7kBG2" target="_blank" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                        <i class="bi bi-heart-fill me-1 text-white"></i> Support Us
+                    </a>
+                </div>
+
+                <!-- Links Columns -->
+                <div class="col-lg-8">
+                    <div class="row g-4 justify-content-lg-end">
+                        
+                        <!-- Product Column -->
+                        <div class="col-6 col-sm-4">
+                            <h5 class="fw-bold mb-3 small text-uppercase tracking-wider">Product</h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                <li><a href="{% if not user.is_authenticated %}{% url 'landing' %}#features{% else %}{% url 'home' %}{% endif %}" class="text-decoration-none text-muted small hover-primary">Features</a></li>
+                                <li><a href="{% if not user.is_authenticated %}{% url 'landing' %}#pricing{% else %}{% url 'pricing' %}{% endif %}" class="text-decoration-none text-muted small hover-primary">Pricing</a></li>
+                                <li><a href="{% url 'blog_list' %}" class="text-decoration-none text-muted small hover-primary">Blog</a></li>
+                                <li><a href="{% url 'demo_login' %}" class="text-decoration-none text-muted small hover-primary">Live Demo</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Company Column -->
+                        <div class="col-6 col-sm-4">
+                            <h5 class="fw-bold mb-3 small text-uppercase tracking-wider">Company</h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                <li><a href="{% url 'about' %}" class="text-decoration-none text-muted small hover-primary">About</a></li>
+                                <li><a href="{% url 'contact' %}" class="text-decoration-none text-muted small hover-primary">Contact</a></li>
+                                <!-- <li><a href="#" class="text-decoration-none text-muted small hover-primary">FAQs</a></li> -->
+                            </ul>
+                        </div>
+
+                        <!-- Legal Column -->
+                        <div class="col-6 col-sm-4">
+                            <h5 class="fw-bold mb-3 small text-uppercase tracking-wider">Legal</h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                <li><a href="{% url 'privacy-policy' %}" class="text-decoration-none text-muted small hover-primary">Privacy Policy</a></li>
+                                <li><a href="{% url 'terms-of-service' %}" class="text-decoration-none text-muted small hover-primary">Terms of Service</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <a href="https://rzp.io/rzp/AP7kBG2" target="_blank" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
-                <i class="bi bi-heart-fill me-1 text-white"></i> <span class="d-none d-sm-inline">Support Us</span><span class="d-inline d-sm-none">Donate</span>
-            </a>
+
+            <hr class="my-4 opacity-10">
+
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <p class="text-muted small mb-0">&copy; {% now "Y" %} TrackMyRupee. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                   <!-- Social links could go here -->
+                </div>
+            </div>
         </div>
     </footer>
 
