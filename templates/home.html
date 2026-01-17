@@ -410,7 +410,7 @@
                     <div class="d-flex flex-column gap-1">
                         {% for item in category_limits|slice:":5" %}
                             {% if item.limit %}
-                            <div class="category-list-item py-1 px-2 d-flex align-items-center gap-3">
+                            <div class="category-list-item py-1 px-2 d-flex align-items-center gap-3 hover-bg-light rounded" style="cursor: pointer;" onclick="filterByCategory('{{ item.name|escapejs }}')">
                                 <!-- Left: Name -->
                                 <div class="d-flex align-items-center gap-2" style="width: 35%; flex-shrink: 0;">
                                     <div class="text-truncate">
@@ -552,7 +552,7 @@
             <div class="card-body px-3 pb-4">
                 <div class="d-flex flex-column gap-1">
                     {% for item in category_limits %}
-                    <div class="category-list-item py-1 px-2 d-flex align-items-center gap-3">
+                    <div class="category-list-item py-1 px-2 d-flex align-items-center gap-3 hover-bg-light rounded" style="cursor: pointer;" onclick="filterByCategory('{{ item.name|escapejs }}')">
                         <!-- Left: Name -->
                         <div class="d-flex align-items-center gap-2" style="width: 35%; flex-shrink: 0;">
                             <div class="text-truncate">
@@ -612,6 +612,8 @@
 {{ top_labels|json_script:"top-labels" }}
 {{ top_amounts|json_script:"top-amounts" }}
 {{ category_limits|json_script:"category-limits-data" }}
+{{ selected_months|json_script:"selected-months-data" }}
+{{ selected_years|json_script:"selected-years-data" }}
 
 <script>
     function showLoader() {
@@ -624,6 +626,20 @@
         document.getElementById('filter-form').submit();
     }
 
+    // Global Filter Function
+    window.filterByCategory = function(category) {
+        const sMonths = JSON.parse(document.getElementById('selected-months-data').textContent);
+        const sYears = JSON.parse(document.getElementById('selected-years-data').textContent);
+        
+        const queryParams = new URLSearchParams();
+        queryParams.append('category', category);
+        if (sMonths && sMonths.length) sMonths.forEach(m => queryParams.append('month', m));
+        if (sYears && sYears.length) sYears.forEach(y => queryParams.append('year', y));
+        
+        showLoader();
+        window.location.href = "{% url 'expense-list' %}?" + queryParams.toString();
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         {% if is_new_user %} return; {% endif %}
 
@@ -634,6 +650,8 @@
         const trendDatasets = JSON.parse(document.getElementById('trend-datasets').textContent);
         const topLabels = JSON.parse(document.getElementById('top-labels').textContent);
         const topAmounts = JSON.parse(document.getElementById('top-amounts').textContent);
+        const sMonths = JSON.parse(document.getElementById('selected-months-data').textContent);
+        const sYears = JSON.parse(document.getElementById('selected-years-data').textContent);
 
         // --- Theme handling ---
         const getThemeColor = () => {
@@ -807,7 +825,27 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } } }
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } } },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
+                    onClick: (evt, elements, chart) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = chart.data.labels[index];
+                            
+                            // Build Query Params
+                            const queryParams = new URLSearchParams();
+                            queryParams.append('category', label);
+                            
+                            if (sMonths && sMonths.length) sMonths.forEach(m => queryParams.append('month', m));
+                            if (sYears && sYears.length) sYears.forEach(y => queryParams.append('year', y));
+                            
+                            // Show loader and redirect
+                            showLoader();
+                            window.location.href = "{% url 'expense-list' %}?" + queryParams.toString();
+                        }
+                    }
                 }
             });
         }
@@ -957,4 +995,12 @@
         });
     });
 </script>
+</script>
+
+<style>
+    .category-list-item:hover h6 {
+        color: var(--color-success) !important;
+        transition: color 0.2s ease-in-out;
+    }
+</style>
 {% endblock %}
