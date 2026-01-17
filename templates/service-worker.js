@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finance-tracker-v2';
+const CACHE_NAME = 'finance-tracker-v3';
 const OFFLINE_URL = '/offline/';
 
 const ASSETS_TO_CACHE = [
@@ -43,18 +43,36 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Navigation requests (HTML pages)
   if (event.request.mode === 'navigate') {
+  if (event.request.mode === 'navigate') {
+    const networkFetch = fetch(event.request)
+      .then((response) => {
+        // dynamic cache of visited pages for offline use
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        return response;
+      });
+
+    const timeoutId = new Promise((resolve) => {
+        setTimeout(() => resolve(null), 3000); // 3 second timeout
+    });
+
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          // If network fails, try cache, then offline page
-          return caches.match(event.request)
-            .then((cachedResponse) => {
-                if (cachedResponse) return cachedResponse;
-                return caches.match(OFFLINE_URL);
-            });
-        })
+      Promise.race([networkFetch, timeoutId]).then((response) => {
+        if (response) return response;
+
+        // Timeout occurred, look in cache
+        return caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) return cachedResponse;
+            return networkFetch; // Keep waiting for network if cache is empty
+        });
+      }).catch(() => {
+         return caches.match(event.request).then((cachedResponse) => {
+             return cachedResponse || caches.match(OFFLINE_URL);
+         });
+      })
     );
     return;
+  }
   }
 
   // Static assets (Cache first, network fallback)
