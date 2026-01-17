@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django.views.generic.base import RedirectView
+from django.views.generic import TemplateView
 from django.conf import settings
 
 from django.contrib.sitemaps.views import sitemap
@@ -56,4 +57,8 @@ urlpatterns = [
     path('apple-touch-icon-precomposed.png', RedirectView.as_view(url='/static/img/pwa-icon-512.png')),
     path('blog/', include('blog.urls')),
     path('', include('expenses.urls')),
+    # PWA
+    path('manifest.json', TemplateView.as_view(template_name='manifest.json', content_type='application/json'), name='manifest'),
+    path('service-worker.js', TemplateView.as_view(template_name='service-worker.js', content_type='application/javascript'), name='service-worker'),
+    path('offline/', TemplateView.as_view(template_name='offline.html'), name='offline'),
 ]

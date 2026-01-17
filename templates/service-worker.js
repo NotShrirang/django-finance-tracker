@@ -1,7 +1,10 @@
-const CACHE_NAME = 'finance-tracker-v1';
+const CACHE_NAME = 'finance-tracker-v2';
+const OFFLINE_URL = '/offline/';
+
 const ASSETS_TO_CACHE = [
   '/',
-  '/static/style.css?v=1.0',
+  OFFLINE_URL,
+  '/static/style.css',
   '/static/icon.svg',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
@@ -13,9 +16,11 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      // Force cache offline page first
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  self.skipWaiting();
 });
 
 // Activate Event
@@ -31,22 +36,28 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  self.clients.claim();
 });
 
-// Fetch Event (Network First, fall back to cache)
+// Fetch Event
 self.addEventListener('fetch', (event) => {
-  // Navigation requests for HTML pages -> Network first, then fallback page (if we had one) or cache
+  // Navigation requests (HTML pages)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
-          return caches.match(event.request);
+          // If network fails, try cache, then offline page
+          return caches.match(event.request)
+            .then((cachedResponse) => {
+                if (cachedResponse) return cachedResponse;
+                return caches.match(OFFLINE_URL);
+            });
         })
     );
     return;
   }
 
-  // Static assets -> Cache first, then network
+  // Static assets (Cache first, network fallback)
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
