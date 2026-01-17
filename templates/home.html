@@ -1,6 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .icon-shape {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .icon-shape-md {
+        width: 3rem;
+        height: 3rem;
+    }
+    .hover-bg-light:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+        transition: background-color 0.2s ease;
+    }
+</style>
 {% if is_new_user %}
 <div class="row align-items-center justify-content-center text-center fade-in" style="min-height: 80vh;">
     <div class="col-md-8 col-lg-6">
@@ -452,25 +469,28 @@
         </div>
     </div>
 
-    <!-- Top 5 Highest Expenses -->
+    <!-- Payment Method Distribution (Moved to Row 1) -->
     <div class="col-md-4">
         <div class="card shadow-lg border-0 h-100 hover-lift fade-in" style="animation-delay: 0.5s">
             <div class="card-header bg-transparent border-bottom fw-bold">
-                Top 5 Highest Expenses
+                Payment Method Distribution
             </div>
             <div class="card-body">
-                <div style="height: 250px; width: 100%;">
-                    <canvas id="topExpensesChart"></canvas>
+                <div style="height: 180px; width: 100%;">
+                    <canvas id="paymentChart"></canvas>
                 </div>
+                {% if not payment_data %}
+                <div class="text-center text-muted mt-5">No data available</div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts Row 1 -->
+<!-- Charts Row 2: Trend Chart + Recent Transactions -->
 <div class="row g-4 mb-4">
-    <!-- Trend Chart (Stacked) -->
-    <div class="col-md-8">
+    <!-- Trend Chart -->
+    <div class="col-md-6">
         <div class="card shadow-lg border-0 h-100">
             <div class="card-header bg-transparent border-bottom fw-bold d-flex justify-content-between">
                 <span>{{ trend_title }} (Stacked by Category)</span>
@@ -482,8 +502,55 @@
             </div>
         </div>
     </div>
+
+    <!-- Recent Transactions Table -->
+    <div class="col-md-6">
+        <div class="card shadow-lg border-0 h-100">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Recent Transactions</span>
+                <a href="{% url 'expense-list' %}" class="btn btn-sm btn-link text-decoration-none fw-bold">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for expense in recent_transactions %}
+                    <div class="list-group-item border-0 d-flex align-items-center py-3 px-3 hover-bg-light position-relative">
+                        <!-- Icon / Avatar -->
+                        <div class="icon-shape icon-shape-md rounded-circle bg-primary-subtle text-primary fw-bold fs-5 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                            {{ expense.category|first|upper }}
+                        </div>
+                        
+                        <!-- Middle Content -->
+                        <div class="flex-grow-1 min-w-0 me-3">
+                            <h6 class="mb-0 fw-bold text-truncate">{{ expense.description }}</h6>
+                            <small class="text-muted">
+                                {{ expense.date|date:"M d" }} • {{ expense.category }}
+                            </small>
+                        </div>
+                        
+                        <!-- Right: Amount -->
+                        <div class="text-end flex-shrink-0">
+                            <span class="d-block fw-bold fs-6">{{ currency_symbol }}{{ expense.amount }}</span>
+                        </div>
+                        
+                        <!-- Clickable Stretched Link -->
+                        <a href="{% url 'expense-edit' expense.pk %}" class="stretched-link"></a>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-receipt fs-1 d-block mb-3 opacity-50"></i>
+                        No recent transactions
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 3: Category Distribution + Top Categories -->
+<div class="row g-4 mb-4">
     <!-- Category Chart -->
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card shadow-lg border-0 h-100">
             <div class="card-header bg-transparent border-bottom fw-bold">
                 Category Distribution
@@ -498,60 +565,17 @@
             </div>
         </div>
     </div>
-</div>
-
-
-
-<!-- Charts Row 3: Recent Transactions + Category Summary -->
-<div class="row g-4 mb-4">
-    <!-- Recent Transactions Table -->
-    <div class="col-md-6">
-        <div class="card shadow-lg border-0 h-100">
-            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                <span class="fw-bold">Recent Transactions</span>
-                <a href="{% url 'expense-list' %}" class="btn btn-sm btn-link text-decoration-none fw-bold">View All</a>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0 text-start align-middle">
-                        <thead>
-                            <tr>
-                                <th class="ps-3">Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th class="text-end pe-3">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for expense in recent_transactions %}
-                            <tr>
-                                <td class="ps-3 text-nowrap small">{{ expense.date|date:"d M" }}</td>
-                                <td class="text-truncate" style="max-width: 150px;">{{ expense.description }}</td>
-                                <td class="text-nowrap">{{ expense.category }}</td>
-                                <td class="text-end pe-3 fw-bold">{{ expense.amount }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-4 text-muted">None</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Category Summary List -->
     <div class="col-md-6">
         <div class="card shadow-lg border-0 h-100">
             <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
                 <span class="fw-bold mb-0">Top Categories</span>
-                <a href="{% url 'expense-list' %}" class="btn btn-sm btn-link text-decoration-none fw-bold">View All</a>
+                <a href="{% url 'category-list' %}" class="btn btn-sm btn-link text-decoration-none fw-bold">View All</a>
             </div>
             <div class="card-body px-3 pb-4">
                 <div class="d-flex flex-column gap-1">
-                    {% for item in category_limits %}
+                    {% for item in category_limits|slice:":5" %}
                     <div class="category-list-item py-1 px-2 d-flex align-items-center gap-3 hover-bg-light rounded" style="cursor: pointer;" onclick="filterByCategory('{{ item.name|escapejs }}')">
                         <!-- Left: Name -->
                         <div class="d-flex align-items-center gap-2" style="width: 35%; flex-shrink: 0;">
@@ -580,8 +604,6 @@
                                      aria-valuemax="100"></div>
                             </div>
                             {% else %}
-                            <!-- No limit set -> Just a full bar or different visual -->
-                            <!-- No limit set -> Use Info color -->
                             <div class="progress w-100 progress-thin">
                                 <div class="progress-bar progress-gradient-info" 
                                      role="progressbar" 
@@ -603,6 +625,7 @@
     </div>
 </div>
 {% include 'partials/savings_modal.html' %}
+
 {% endif %}
 
 {{ categories|json_script:"categories-data" }}
@@ -614,6 +637,8 @@
 {{ category_limits|json_script:"category-limits-data" }}
 {{ selected_months|json_script:"selected-months-data" }}
 {{ selected_years|json_script:"selected-years-data" }}
+{{ payment_labels|json_script:"payment-labels" }}
+{{ payment_data|json_script:"payment-data" }}
 
 <script>
     function showLoader() {
@@ -644,14 +669,28 @@
         {% if is_new_user %} return; {% endif %}
 
         // --- Data ---
-        const categories = JSON.parse(document.getElementById('categories-data').textContent);
-        const categoryAmounts = JSON.parse(document.getElementById('category-amounts-data').textContent);
-        const trendLabels = JSON.parse(document.getElementById('trend-labels').textContent);
-        const trendDatasets = JSON.parse(document.getElementById('trend-datasets').textContent);
-        const topLabels = JSON.parse(document.getElementById('top-labels').textContent);
-        const topAmounts = JSON.parse(document.getElementById('top-amounts').textContent);
-        const sMonths = JSON.parse(document.getElementById('selected-months-data').textContent);
-        const sYears = JSON.parse(document.getElementById('selected-years-data').textContent);
+        // --- Data Safety Check Helper ---
+        const safeParse = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return [];
+            try {
+                return JSON.parse(el.textContent) || [];
+            } catch (e) {
+                console.error('Error parsing JSON for ' + id, e);
+                return [];
+            }
+        };
+
+        const categories = safeParse('categories-data');
+        const categoryAmounts = safeParse('category-amounts-data');
+        const trendLabels = safeParse('trend-labels');
+        const trendDatasets = safeParse('trend-datasets');
+        const topLabels = safeParse('top-labels');
+        const topAmounts = safeParse('top-amounts');
+        const sMonths = safeParse('selected-months-data');
+        const sYears = safeParse('selected-years-data');
+        const paymentLabels = safeParse('payment-labels');
+        const paymentData = safeParse('payment-data');
 
         // --- Theme handling ---
         const getThemeColor = () => {
@@ -850,39 +889,17 @@
             });
         }
 
-        // --- 3. Top Expenses Chart ---
-        const ctxTop = document.getElementById('topExpensesChart').getContext('2d');
-        const gradTop = createGradient(ctxTop, '#4facfe', '#00f2fe'); // Cyan-Blue
-
-        charts.topExpenses = new Chart(ctxTop, {
-            type: 'bar',
-            data: {
-                labels: topLabels,
-                datasets: [{
-                    label: 'Amount',
-                    data: topAmounts,
-                    backgroundColor: gradTop,
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { color: currentColors.grid } },
-                    y: { grid: { display: false } }
-                }
-            }
-        });
+        // --- 3. Top Expenses Chart (Removed) ---
 
         // --- 4. Budget vs Spent Chart ---
         const limitsData = JSON.parse(document.getElementById('category-limits-data').textContent);
         const withLimits = limitsData.filter(item => item.limit !== null && item.limit > 0);
         
-        if (withLimits.length > 0) {
-            const ctxBudget = document.getElementById('budgetChart').getContext('2d');
+        // Safety check: only init if canvas exists
+        const budgetCanvas = document.getElementById('budgetChart');
+
+        if (withLimits.length > 0 && budgetCanvas) {
+            const ctxBudget = budgetCanvas.getContext('2d');
             const budgetLabels = withLimits.map(item => item.name);
             const spentData = withLimits.map(item => Math.min((item.total / item.limit) * 100, 100));
             const remainingData = spentData.map(spentPct => 100 - spentPct);
@@ -993,8 +1010,119 @@
             attributes: true,
             attributeFilter: ['data-bs-theme']
         });
+
+        // --- 5. Payment Method Chart ---
+        const initPaymentChart = () => {
+            
+            if (paymentLabels && paymentLabels.length > 0) {
+                const canvas = document.getElementById('paymentChart');
+                if (canvas) {
+                     const ctxPayment = canvas.getContext('2d');
+                     
+                     // Match Category Chart Gradients
+                     const paymentGradients = [
+                         createGradient(ctxPayment, '#00c6ff', '#0072ff'), // Blue
+                         createGradient(ctxPayment, '#43e97b', '#38f9d7'), // Teal
+                         createGradient(ctxPayment, '#8E2DE2', '#4A00E0'), // Purple
+                         createGradient(ctxPayment, '#4facfe', '#00f2fe'), // Cyan
+                         createGradient(ctxPayment, '#30cfd0', '#330867'), // Sea-Blue
+                         createGradient(ctxPayment, '#fa709a', '#fee140'), // Yellow-Red (Extra)
+                         createGradient(ctxPayment, '#667eea', '#764ba2')  // Deep Purple (Extra)
+                     ];
+     
+                     try {
+                         if (charts.payment) charts.payment.destroy();
+     
+                         charts.payment = new Chart(ctxPayment, {
+                             type: 'bar',
+                             data: {
+                                 labels: paymentLabels,
+                                 datasets: [{
+                                     label: 'Amount',
+                                     data: paymentData,
+                                     backgroundColor: paymentGradients,
+                                     borderRadius: 4,
+                                     barPercentage: 0.6,
+                                 }]
+                             },
+                             options: {
+                                 indexAxis: 'y', // Horizontal Bar
+                                 responsive: true,
+                                 maintainAspectRatio: false,
+                                 scales: {
+                                     x: {
+                                         grid: { display: false, drawBorder: false },
+                                         ticks: { display: false } // Hide X axis labels for cleaner look
+                                     },
+                                     y: {
+                                         grid: { display: false, drawBorder: false },
+                                         ticks: {font: { weight: 'bold' } }
+                                     }
+                                 },
+                                 plugins: { 
+                                     legend: { display: false }, // Legend redundant for bar chart with labels on Y axis
+                                     tooltip: {
+                                         callbacks: {
+                                             label: function(context) {
+                                                 let label = context.dataset.label || '';
+                                                 if (label) {
+                                                     label += ': ';
+                                                 }
+                                                 if (context.parsed.x !== null) {
+                                                     label += '{{ currency_symbol }}' + context.parsed.x.toLocaleString();
+                                                 }
+                                                 return label;
+                                             }
+                                         }
+                                     },
+                                     datalabels: { // Requires plugin, but we can do custom drawing if needed. 
+                                        // For now let's just use tooltips and clean bars.
+                                     }
+                                 },
+                                 onClick: (e, elements, chart) => {
+                                     if (elements.length > 0) {
+                                         const index = elements[0].index;
+                                         const label = chart.data.labels[index];
+                                         window.location.href = "{% url 'expense-list' %}?payment_method=" + encodeURIComponent(label);
+                                     }
+                                 },
+                                 onHover: (event, chartElement) => {
+                                     event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+                                 }
+                             },
+                             plugins: [{
+                                 id: 'barValues',
+                                 afterDatasetsDraw(chart) {
+                                     const { ctx } = chart;
+                                     ctx.save();
+                                     const meta = chart.getDatasetMeta(0);
+                                     meta.data.forEach((bar, index) => {
+                                         const value = paymentData[index];
+                                         const text = '{{ currency_symbol }}' + value.toLocaleString();
+                                         ctx.font = 'bold 11px sans-serif';
+                                         ctx.fillStyle = '#6c757d'; // Muted text color
+                                         ctx.textAlign = 'left';
+                                         ctx.textBaseline = 'middle';
+                                         // Draw text to the right of the bar
+                                         ctx.fillText(text, bar.x + 5, bar.y);
+                                     });
+                                     ctx.restore();
+                                 }
+                             }]
+                         });
+                     } catch (err) {
+                         console.error('Payment Chart Init Failed', err);
+                     }
+                } else {
+                    // console.error('Payment Chart Helper: Canvas not found'); // Removed as per instruction
+                }
+            }
+        };
+
+        // Try init immediately if ready, AND on window load to be safe
+        initPaymentChart();
+        window.addEventListener('load', initPaymentChart);
     });
-</script>
 </script>
 
 <style>

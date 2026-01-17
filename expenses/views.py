@@ -428,6 +428,18 @@ def home_view(request):
     ie_expense_data = [exp_map.get(p, 0.0) for p in all_periods_sorted]
     ie_savings_data = [inc_map.get(p, 0.0) - exp_map.get(p, 0.0) for p in all_periods_sorted]
 
+    # --- NEW: Payment Method Distribution ---
+    raw_payment_data = expenses.values('payment_method').annotate(total=Sum('amount')).order_by('payment_method')
+    payment_map = {}
+    for item in raw_payment_data:
+        pm_name = item['payment_method'] or 'Unknown'
+        payment_map[pm_name] = float(item['total'])
+    
+    # Sort by total desc
+    sorted_payment_items = sorted(payment_map.items(), key=lambda x: x[1], reverse=True)
+    payment_labels = [item[0] for item in sorted_payment_items]
+    payment_data = [item[1] for item in sorted_payment_items]
+
 
     # 4. Summary Stats
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -732,6 +744,8 @@ def home_view(request):
         'ie_income_data': ie_income_data,
         'ie_expense_data': ie_expense_data,
         'ie_savings_data': ie_savings_data,
+        'payment_labels': payment_labels,
+        'payment_data': payment_data,
         'years': years,
         'all_categories': all_categories,
         'selected_years': selected_years,
@@ -924,6 +938,12 @@ class ExpenseListView(LoginRequiredMixin, RecurringTransactionMixin, ListView):
 
         if selected_categories:
             queryset = queryset.filter(category__in=selected_categories)
+        
+        # Filter by Payment Method
+        payment_method = self.request.GET.get('payment_method')
+        if payment_method:
+            queryset = queryset.filter(payment_method=payment_method)
+
         if search_query:
             queryset = queryset.filter(description__icontains=search_query)
             
