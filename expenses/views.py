@@ -1112,10 +1112,7 @@ class ExpenseCreateView(LoginRequiredMixin, generic.TemplateView):
                     return redirect(next_url)
                 return redirect('expense-list')
             except IntegrityError as e:
-                print(f"DEBUG: IntegrityError: {e}")
-                print(f"DEBUG: Formset Errors: {formset.errors}")
-                print(f"DEBUG: Formset Cleaned Data: {formset.cleaned_data}")
-                messages.error(request, f"Database Error: {e}. duplicate found! You already have this expense recorded for this date.")
+                messages.error(request, f"Duplicate record found! You already have this expense recorded for this date.")
                 return render(request, self.template_name, {'formset': formset})
         return render(request, self.template_name, {'formset': formset})
 
