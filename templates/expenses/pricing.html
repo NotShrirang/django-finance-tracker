@@ -141,8 +141,6 @@ async function startPayment(planType) {
 
         var options = {
             "key": "{{ RAZORPAY_KEY_ID }}", // Enter the Key ID generated from the Dashboard
-            "amount": orderData.amount, 
-            "currency": orderData.currency,
             "name": "TrackMyRupee",
             "description": "Upgrade to " + planType,
             "order_id": orderData.id, 
