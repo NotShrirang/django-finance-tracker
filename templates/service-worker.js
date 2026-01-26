@@ -41,6 +41,9 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
+  // Fix: Ignore non-GET requests (like Razorpay POST) to prevent Cache API errors
+  if (event.request.method !== 'GET') return;
+
   // Navigation requests (HTML pages)
   if (event.request.mode === 'navigate') {
   if (event.request.mode === 'navigate') {
