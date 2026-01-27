@@ -12,7 +12,7 @@
     </div>
 </div>
 
-<div class="row row-cols-1 row-cols-md-3 mb-3 text-center fade-in">
+<div class="row row-cols-1 row-cols-md-3 mb-3 g-4 text-center fade-in">
     <!-- Free Plan -->
     <div class="col">
         <div class="card mb-4 rounded-4 shadow-sm border-0 h-100 position-relative hover-lift">
@@ -24,7 +24,8 @@
                 <ul class="list-unstyled mt-3 mb-4 text-start small mx-auto">
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Expenses/Income</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>5 Categories</li>
-                    <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Export Info</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Basic Reports</li>
+                    <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Email Reminders</li>
                     <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-2"></i>Recurring Transactions</li>
                 </ul>
                 {% if user.profile.tier == 'FREE' %}
@@ -51,6 +52,7 @@
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Everything in Free</strong></li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>10 Budget Categories</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>3 Recurring Transactions</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Email Reminders</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Export to CSV/Excel</li>
                 </ul>
                 {% if user.profile.tier == 'PLUS' and user.profile.is_plus %}
@@ -76,6 +78,7 @@
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Everything in Plus</strong></li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Categories</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited Recurring Txs</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Email Reminders</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Priority Support</li>
                     <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>AI Insights (Coming Soon)</li>
                 </ul>

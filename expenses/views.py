@@ -19,7 +19,7 @@ from django.utils import timezone
 from datetime import datetime, date, timedelta
 import calendar
 
-from .models import Expense, Category, Income, RecurringTransaction, UserProfile, SubscriptionPlan
+from .models import Expense, Category, Income, RecurringTransaction, UserProfile, SubscriptionPlan, Notification
 from finance_tracker.ai_utils import predict_category_ai
 from .forms import ExpenseForm, IncomeForm, RecurringTransactionForm, ProfileUpdateForm, CustomSignupForm, ContactForm
 from allauth.socialaccount.models import SocialAccount
@@ -2189,5 +2189,39 @@ def predict_category_view(request):
         
         category = predict_category_ai(description, request.user)
         return JsonResponse({'category': category})
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# --------------------
+# Notification Views
+# --------------------
+
+class NotificationListView(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = 'expenses/notification_list.html'
+    context_object_name = 'notifications'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['unread_count'] = Notification.objects.filter(user=self.request.user, is_read=False).count()
+        return context
+
+@login_required
+def mark_notifications_read(request):
+    if request.method == 'POST':
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        messages.success(request, "All notifications marked as read.")
+        return redirect('notification-list')
+    return redirect('notification-list')
+
+@login_required
+def mark_single_notification_read(request, pk):
+    if request.method == 'POST':
+        notification = get_object_or_404(Notification, pk=pk, user=request.user)
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
 
