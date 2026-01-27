@@ -2231,12 +2231,12 @@ def mark_single_notification_read(request, pk):
 def trigger_notifications(request):
     """
     HTTP endpoint to trigger notifications via external cron service (e.g. cron-job.org).
-    Secured by a secret key in the URL params: ?secret=YOUR_SECRET_KEY
+    Secured by a secret key in the URL params: ?secret=YOUR_CRON_SECRET
     """
     secret = request.GET.get('secret')
     
-    # You should add CRON_SECRET to your .env file
-    if not secret or secret != settings.SECRET_KEY: # Using SECRET_KEY as fallback/simple check
+    # Check against dedicated CRON_SECRET
+    if not secret or secret != settings.CRON_SECRET:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
     try:

@@ -44,6 +44,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+# Secret for triggered cron jobs (URL-safe)
+CRON_SECRET = os.getenv('CRON_SECRET', 'change_me_in_prod')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
