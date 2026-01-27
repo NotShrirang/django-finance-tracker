@@ -432,7 +432,7 @@
                 </div>
             </div>
             <button id="installAppBtn" class="btn btn-primary btn-sm rounded-pill px-3">Install</button>
-            <button type="button" class="btn-close ms-2" onclick="document.getElementById('installAppContainer').style.display='none'"></button>
+            <button type="button" class="btn-close ms-2" onclick="dismissPWAInstall()"></button>
         </div>
     </div>
 
@@ -445,7 +445,7 @@
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
         // Only show if not already installed and elements exist
-        if (!isStandalone && installContainer && installBtn) {
+        if (!isStandalone && installContainer && installBtn && !localStorage.getItem('pwaInstallDismissed')) {
             // Android/Chrome
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
@@ -457,6 +457,11 @@
             if (isIos) {
                 installContainer.style.display = 'block';
             }
+        }
+        
+        function dismissPWAInstall() {
+             if(installContainer) installContainer.style.display = 'none';
+             localStorage.setItem('pwaInstallDismissed', 'true');
         }
 
         if (installBtn) {
@@ -557,7 +562,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
