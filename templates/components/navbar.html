@@ -87,6 +87,11 @@
                             Calendar
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{% url 'analytics' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}">
+                            Analytics
+                        </a>
+                    </li>
                     <!-- Settings Link (Removed, moving to dropdown) -->
 
                     <!-- Vertical Divider (Desktop) -->

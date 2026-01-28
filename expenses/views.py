@@ -2251,3 +2251,122 @@ def trigger_notifications(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 
+
+class AnalyticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'expenses/analytics.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        today = timezone.now().date()
+        
+        # 1. Monthly Trends (Last 12 Months)
+        labels = []
+        income_data = []
+        expense_data = []
+        balance_rate_data = []
+        
+        # Determine the start date: 1st day of the month 11 months ago
+        # If today is Jan 2026, 11 months ago is Feb 2025.
+        start_date = (today.replace(day=1) - timedelta(days=365)).replace(day=1)
+        
+        # Fetch data grouped by Month
+        monthly_income = Income.objects.filter(
+            user=user, date__gte=start_date
+        ).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+        
+        monthly_expenses = Expense.objects.filter(
+            user=user, date__gte=start_date
+        ).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+        
+        # Merge data into a map {date: {income: 0, expense: 0}}
+        data_map = {}
+        
+        # Initialize map with all 12 months to ensure 0s for missing months
+        # Iterate from start_date to today month by month
+        curr = start_date
+        while curr <= today:
+            d = curr.replace(day=1)
+            data_map[d] = {'income': 0, 'expense': 0}
+            # Move to next month
+            # Carefully handle month increment
+            next_month = curr.month + 1
+            next_year = curr.year
+            if next_month > 12:
+                next_month = 1
+                next_year += 1
+            curr = date(next_year, next_month, 1)
+
+        # Fill with DB data
+        # Fill with DB data
+        for item in monthly_income:
+            if item['month']:
+                d = item['month']
+                if isinstance(d, datetime):
+                    d = d.date()
+                d = d.replace(day=1)
+                if d in data_map:
+                    data_map[d]['income'] = float(item['total'])
+                
+        for item in monthly_expenses:
+             if item['month']:
+                d = item['month']
+                if isinstance(d, datetime):
+                    d = d.date()
+                d = d.replace(day=1)
+                if d in data_map:
+                    data_map[d]['expense'] = float(item['total'])
+                
+        # Sort and prepare lists
+        sorted_keys = sorted(data_map.keys())
+        # Limit to last 12 months if while loop went over
+        sorted_keys = sorted_keys[-12:]
+        
+        for k in sorted_keys:
+            labels.append(k.strftime('%b %Y'))
+            inc = data_map[k]['income']
+            exp = data_map[k]['expense']
+            income_data.append(inc)
+            expense_data.append(exp)
+            
+            # Balance Rate = (Income - Expense) / Income * 100
+            if inc > 0:
+                rate = ((inc - exp) / inc) * 100
+            else:
+                rate = 0
+            balance_rate_data.append(round(rate, 1))
+
+        context['chart_labels'] = labels
+        context['income_data'] = income_data
+        context['expense_data'] = expense_data
+        context['balance_rate_data'] = balance_rate_data
+        
+        # 2. Category Breakdown (Current Year)
+        current_year = today.year
+        category_stats = Expense.objects.filter(
+            user=user, date__year=current_year
+        ).values('category').annotate(total=Sum('amount')).order_by('-total')
+        
+        cat_labels = [x['category'] for x in category_stats]
+        cat_data = [float(x['total']) for x in category_stats]
+        
+        context['cat_labels'] = cat_labels
+        context['cat_data'] = cat_data
+        
+        # 3. Key Metrics (YTD)
+        # Recalculate based on DB (more accurate than summing chart data if chart is limited)
+        # Use date__lte=today to ensure we don't include future recurring entries or future dates
+        ytd_income_agg = Income.objects.filter(user=user, date__year=current_year, date__lte=today).aggregate(Sum('amount'))['amount__sum'] or 0
+        ytd_expense_agg = Expense.objects.filter(user=user, date__year=current_year, date__lte=today).aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        context['total_income_ytd'] = ytd_income_agg
+        context['total_expense_ytd'] = ytd_expense_agg
+        context['total_balance_ytd'] = ytd_income_agg - ytd_expense_agg
+        
+        if ytd_income_agg > 0:
+            context['avg_balance_rate'] = round(((ytd_income_agg - ytd_expense_agg) / ytd_income_agg) * 100, 1)
+        else:
+            context['avg_balance_rate'] = 0
+            
+        return context
+
