@@ -50,6 +50,7 @@ urlpatterns = [
     path('terms-of-service/', TemplateView.as_view(template_name='terms_of_service.html'), name='terms-of-service'),
     path('refund-policy/', TemplateView.as_view(template_name='refund_policy.html'), name='refund-policy'),
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
+    path('offline/', TemplateView.as_view(template_name='offline.html'), name='offline'),
     path('contact/', views.ContactView.as_view(), name='contact'),
 
     # to keep alive on render
