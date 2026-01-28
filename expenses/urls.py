@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.LandingPageView.as_view(), name='landing'),
     path('dashboard/', views.home_view, name='home'),
     path('budget/', views.BudgetDashboardView.as_view(), name='budget'),
+    path('analytics/', views.AnalyticsView.as_view(), name='analytics'),
     path('demo/', views.demo_login, name='demo_login'),
     path('demo-signup/', views.demo_signup, name='demo_signup'),
     path('upload/', views.upload_view, name='upload'),
