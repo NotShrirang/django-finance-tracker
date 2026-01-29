@@ -4,8 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrackMyRupee - Privacy-First Finance Tracker</title>
-    <meta name="description" content="A self-hosted, privacy-first personal finance tracker. No SMS reading, no bank syncing—just you and your data.">
+    <meta name="description" content="A self-hosted, privacy-first personal finance tracker. No SMS reading, no bank syncing—just you and your data. Track expenses, subscriptions, and budgets securely.">
+    <meta name="keywords" content="finance tracker, expense tracker, privacy first, self-hosted, django, docker, budget manager, personal finance, rupee tracker, no sms reading">
+    <meta name="author" content="Omkar Pathak">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://trackmyrupee.com/">
     <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackmyrupee.com/">
+    <meta property="og:title" content="TrackMyRupee - Privacy-First Finance Tracker">
+    <meta property="og:description" content="Take back control of your finances. A self-hosted expense tracker that respects your privacy. No bank syncing, no SMS reading.">
+    <meta property="og:image" content="https://trackmyrupee.com/misc/dashboard2.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://trackmyrupee.com/">
+    <meta property="twitter:title" content="TrackMyRupee - Privacy-First Finance Tracker">
+    <meta property="twitter:description" content="Take back control of your finances. A self-hosted expense tracker that respects your privacy. No bank syncing, no SMS reading.">
+    <meta property="twitter:image" content="https://trackmyrupee.com/misc/dashboard2.png">
+    <meta name="twitter:creator" content="@omkarpathak27">
+    
+    <!-- Geo -->
+    <meta name="geo.region" content="IN">
+    <meta name="geo.placename" content="India">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TrackMyRupee",
+      "operatingSystem": "Web, Docker",
+      "applicationCategory": "FinanceApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "A self-hosted, privacy-first personal finance tracker. No SMS reading, no bank syncing—just you and your data.",
+      "author": {
+        "@type": "Person",
+        "name": "Omkar Pathak",
+        "url": "https://github.com/OmkarPathak"
+      }
+    }
+    </script>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -111,6 +156,7 @@
         .text-gradient {
             background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
     </style>
