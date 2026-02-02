@@ -68,27 +68,27 @@
                 <!-- Authenticated User Links -->
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" onclick="showLoader()">
                             Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'expense-list' %}" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'expense-list' %}" class="nav-link {% if 'expense' in request.resolver_match.url_name %}active{% endif %}" onclick="showLoader()">
                             Expenses
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'recurring-list' %}" class="nav-link {% if 'recurring' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'recurring-list' %}" class="nav-link {% if 'recurring' in request.resolver_match.url_name %}active{% endif %}" onclick="showLoader()">
                             Subscriptions
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'calendar' %}" class="nav-link {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'calendar' %}" class="nav-link {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}" onclick="showLoader()">
                             Calendar
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'analytics' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'analytics' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}" onclick="showLoader()">
                             Analytics
                         </a>
                     </li>
@@ -208,7 +208,7 @@
                         </div>
                     </li>
                     <li class="nav-item d-lg-none">
-                        <a href="{% url 'settings-home' %}" class="nav-link">
+                        <a href="{% url 'settings-home' %}" class="nav-link" onclick="showLoader()">
                            <i class="bi bi-gear me-2"></i> Settings
                         </a>
                     </li>
