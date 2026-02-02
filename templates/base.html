@@ -896,12 +896,12 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mb-2">
                 <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'expense-create' %}">
+                    <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'expense-create' %}" onclick="showLoader()">
                         <i class="bi bi-dash-circle text-primary me-2"></i> Add Expense
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'income-create' %}">
+                    <a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'income-create' %}" onclick="showLoader()">
                         <i class="bi bi-plus-circle text-success me-2"></i> Add Income
                     </a>
                 </li>
