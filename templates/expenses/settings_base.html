@@ -14,8 +14,7 @@
                             Plan</small>
                         <div class="d-flex align-items-center">
                             <span class="fw-bold text-primary">{{ user.profile.get_tier_display }}</span>
-                            {% if user.profile.is_pro %}<i class="bi bi-patch-check-fill text-primary ms-1"></i>{% endif
-                            %}
+                            {% if user.profile.is_pro %}<i class="bi bi-patch-check-fill text-primary ms-1"></i>{% endif %}
                         </div>
                     </div>
                     {% if not user.profile.is_pro %}
